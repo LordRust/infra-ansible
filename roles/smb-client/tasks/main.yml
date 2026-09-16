@@ -1,0 +1,8 @@
+- name: Configure and mount SMB filesystems
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: cifs
+    opts: "{{ item.opts }},credentials=/etc/samba/credentials/{{ item.credential }}"
+    state: mounted
+  loop: "{{ smb_mounts }}"

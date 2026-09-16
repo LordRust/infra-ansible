@@ -1,0 +1,10 @@
+- name: Configure basic dev VM
+  hosts: devhosts
+  become: true
+
+  roles:
+    - base
+    - nfs-client
+    #- smb-client
+    - docker
+    - apptainer

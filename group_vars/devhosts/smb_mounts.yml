@@ -1,0 +1,5 @@
+smb_mounts:
+  - path: /labshare
+    src: //fileserver.example.org/labshare
+    credential: labshare
+    opts: ro,vers=3.0

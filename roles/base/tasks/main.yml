@@ -1,0 +1,26 @@
+- name: Install base packages
+  ansible.builtin.apt:
+    name:
+      - git
+      - tmux
+      - htop
+      - curl
+      - ca-certificates
+      - sudo
+    state: present
+    update_cache: true
+
+- name: Ensure dev group exists
+  ansible.builtin.group:
+    name: dev
+    state: present
+
+- name: Ensure users exist
+  ansible.builtin.user:
+    name: "{{ item }}"
+    groups: dev
+    append: true
+    shell: /bin/bash
+    create_home: true
+    state: present
+  loop: "{{ dev_users }}"

@@ -1,0 +1,13 @@
+- name: Install NFS client
+  ansible.builtin.apt:
+    name: nfs-common
+    state: present
+
+- name: Configure and mount NFS filesystems
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "{{ item.src }}"
+    fstype: nfs
+    opts: "{{ item.opts | default('ro,_netdev,x-systemd.automount,nofail') }}"
+    state: mounted
+  loop: "{{ nfs_mounts }}"

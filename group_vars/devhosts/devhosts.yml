@@ -1,0 +1,5 @@
+dev_users:
+  - jonas
+  - jakob
+
+apptainer_version: "1.5.3"

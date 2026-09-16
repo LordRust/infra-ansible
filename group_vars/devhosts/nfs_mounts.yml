@@ -1,0 +1,9 @@
+nfs_mounts:
+  - path: /fs1
+    src: rs-fs1.lunarc.lu.se:/disk
+  - path: /fs2
+    src: rs-fs2.lunarc.lu.se:/disk
+  - path: /access
+    src: mtlucmds1.lund.skane.se:/access
+  - path: /data
+    src: mtlucmds1.lund.skane.se:/data

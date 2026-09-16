@@ -1,0 +1,10 @@
+- name: Download Apptainer package
+  ansible.builtin.get_url:
+    url: "https://github.com/apptainer/apptainer/releases/download/v{{ apptainer_version }}/apptainer_{{ apptainer_version }}-trixie+_amd64.deb"
+    dest: "/tmp/apptainer_{{ apptainer_version }}-trixie+_amd64.deb"
+    mode: "0644"
+
+- name: Install Apptainer
+  ansible.builtin.apt:
+    deb: "/tmp/apptainer_{{ apptainer_version }}-trixie+_amd64.deb"
+    state: present
