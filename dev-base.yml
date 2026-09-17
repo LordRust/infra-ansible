@@ -5,6 +5,6 @@
   roles:
     - base
     - nfs-client
-    #- smb-client
+    # - smb-client
     - docker
     - apptainer

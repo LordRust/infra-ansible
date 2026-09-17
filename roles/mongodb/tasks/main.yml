@@ -1,0 +1,70 @@
+---
+- name: Verify supported Debian version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - ansible_distribution_major_version == "12"
+      - ansible_architecture == "x86_64"
+    fail_msg: "MongoDB role currently supports Debian 12 amd64 only"
+
+- name: Install APT repository dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-debian
+      - ca-certificates
+    state: present
+    update_cache: true
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    mode: "0755"
+
+- name: Download MongoDB signing key
+  ansible.builtin.get_url:
+    url: "https://pgp.mongodb.com/server-{{ mongodb_version }}.asc"
+    dest: "/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+    mode: "0644"
+
+- name: Add MongoDB APT repository
+  ansible.builtin.deb822_repository:
+    name: "mongodb-org-{{ mongodb_version }}"
+    types:
+      - deb
+    uris:
+      - https://repo.mongodb.org/apt/debian
+    suites:
+      - "bookworm/mongodb-org/{{ mongodb_version }}"
+    components:
+      - main
+    architectures:
+      - amd64
+    signed_by: "/etc/apt/keyrings/mongodb-server-{{ mongodb_version }}.asc"
+    state: present
+  register: mongodb_repository
+
+- name: Update APT cache after repository change
+  ansible.builtin.apt:
+    update_cache: true
+  when: mongodb_repository.changed
+
+- name: Install MongoDB Community
+  ansible.builtin.apt:
+    name: mongodb-org
+    state: present
+
+- name: Configure MongoDB
+  ansible.builtin.template:
+    src: mongod.conf.j2
+    dest: /etc/mongod.conf
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart MongoDB
+
+- name: Ensure MongoDB is enabled and running
+  ansible.builtin.service:
+    name: mongod
+    enabled: true
+    state: started

@@ -1,0 +1,11 @@
+---
+mongodb_version: "8.0"
+
+mongodb_port: 27017
+
+mongodb_bind_addresses:
+  - "127.0.0.1"
+  - "{{ ansible_host | default(ansible_default_ipv4.address) }}"
+
+# Secure default. Override per host if deliberately running without auth.
+mongodb_authorization: enabled
