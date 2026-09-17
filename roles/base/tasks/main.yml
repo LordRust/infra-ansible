@@ -31,7 +31,7 @@
     uid: "{{ item.uid }}"
     group: "{{ item.primary_group }}"
     groups: "{{ item.groups | default(omit) }}"
-    append: true
+    append: "{{ (item.groups | default([]) | length) > 0 }}"
     shell: /bin/bash
     create_home: true
     state: present
