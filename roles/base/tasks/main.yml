@@ -1,3 +1,4 @@
+---
 - name: Install base packages
   ansible.builtin.apt:
     name:
@@ -10,17 +11,28 @@
     state: present
     update_cache: true
 
-- name: Ensure dev group exists
+- name: Ensure supplementary groups exist
   ansible.builtin.group:
-    name: dev
+    name: "{{ item.name }}"
+    gid: "{{ item.gid }}"
     state: present
+  loop: "{{ managed_groups }}"
 
-- name: Ensure users exist
+- name: Ensure user primary groups exist
+  ansible.builtin.group:
+    name: "{{ item.primary_group }}"
+    gid: "{{ item.primary_gid }}"
+    state: present
+  loop: "{{ managed_users }}"
+
+- name: Ensure users exist with correct UID/GID
   ansible.builtin.user:
-    name: "{{ item }}"
+    name: "{{ item.name }}"
+    uid: "{{ item.uid }}"
+    group: "{{ item.primary_group }}"
     groups: dev
     append: true
     shell: /bin/bash
     create_home: true
     state: present
-  loop: "{{ dev_users }}"
+  loop: "{{ managed_users }}"

@@ -1,0 +1,15 @@
+---
+managed_groups:
+  - name: cmd-bnf
+    gid: 1004       # replace with actual GID
+
+managed_users:
+  - name: jonas
+    uid: 119       # replace with actual UID
+    primary_group: cmd-bnf
+    primary_gid: 1004   # replace with actual GID
+
+  - name: jakob
+    uid: 1029
+    primary_group: cmd-bnf
+    primary_gid: 1004
