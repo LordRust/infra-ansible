@@ -19,19 +19,45 @@ Proxmox host:
 
 The physical network limits the number of DHCP addresses available per switch port, so test VMs are placed behind NAT.
 
-## Current VMs
+## VM organization
+
+Use Proxmox VMIDs to indicate the machine class:
+
+| VMID range | Purpose |
+|---:|---|
+| 100-199 | Templates |
+| 200-299 | Administration and management VMs |
+| 300-399 | Development VMs |
+| 400-499 | Infrastructure/services; reserved |
+| 500-599 | Database VMs |
+| 600-999 | Reserved for future classes |
+
+For normal VM instances, start at `x01` within each class so the final two
+digits correspond to the instance number. For example, `201` is admin VM 01,
+`301` is development VM 01, and `501` is database VM 01.
+
+Templates are an exception and are allocated sequentially from VMID 100.
+
+Target organization for the current machines:
 
 | VMID | Name | Address | Purpose |
 |---:|---|---|---|
-| 200 | `devvm01` | `10.10.10.11` | Development VM |
 | 201 | `infra-admin-01` | `10.10.10.10` | Ansible control host |
-| 202 | `mongodb01` | `10.10.10.12` | MongoDB test VM |
+| 202 | `infra-admin-02` | `10.10.10.11` | Ansible control host |
+| 301 | `devvm01` | `10.10.10.101` | Development VM |
+| 302 | `devvm02` | `10.10.10.102` | Development VM |
+| 303 | `devvm03` | `10.10.10.103` | Development VM |
+| 501 | `mongodb01` | `10.10.10.32` | MongoDB test VM |
+
+Existing VMs may temporarily retain older VMIDs or addresses while they are
+being rebuilt, migrated, or retired. New and rebuilt VMs should follow the
+allocation above.
 
 VMID 100 is the older manually-created Debian 13 template and should eventually be retired after the cloud-image replacement has been validated.
 
 VMID 101 is the Debian 12 cloud-init template used for `mongodb01`.
 
-A Debian 13 genericcloud template should be created for future Debian 13 guests.
+VMID 102 is the validated Debian 13 `genericcloud` template for new Debian 13 guests.
 
 ## Configuration boundaries
 

@@ -15,6 +15,35 @@ iface vmbr1 inet static
         bridge-fd 0
 ```
 
+## Private address allocation
+
+Keep fixed guest addresses grouped by machine class:
+
+| Address range | Purpose |
+|---|---|
+| `10.10.10.1` | Proxmox private gateway |
+| `10.10.10.2-9` | Infrastructure/reserved |
+| `10.10.10.10-16` | Administration and management VMs |
+| `10.10.10.17-31` | Reserved |
+| `10.10.10.32-48` | Database VMs |
+| `10.10.10.49-100` | Infrastructure/services and reserved space |
+| `10.10.10.101-132` | Development VMs |
+| `10.10.10.133-254` | Spare/reserved |
+
+Current target assignments start as follows:
+
+| Name | Address |
+|---|---|
+| `infra-admin-01` | `10.10.10.10` |
+| `infra-admin-02` | `10.10.10.11` |
+| `mongodb01` | `10.10.10.32` |
+| `devvm01` | `10.10.10.101` |
+| `devvm02` | `10.10.10.102` |
+| `devvm03` | `10.10.10.103` |
+
+New and rebuilt VMs should follow these ranges. Existing VMs may temporarily
+retain older addresses while being migrated or retired.
+
 ## Outbound NAT
 
 IPv4 forwarding and source NAT are configured as `vmbr1` interface hooks in `/etc/network/interfaces`.
@@ -51,11 +80,11 @@ Example for `devvm01`:
 
 ```ini
 # devvm01
-post-up   iptables -t nat -C PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.11:22 || iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.11:22
-post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.11:22 || true
+post-up   iptables -t nat -C PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22 || iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22
+post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22 || true
 
-post-up   iptables -C FORWARD -i vmbr0 -p tcp -d 10.10.10.11 --dport 22 -j ACCEPT || iptables -A FORWARD -i vmbr0 -p tcp -d 10.10.10.11 --dport 22 -j ACCEPT
-post-down iptables -D FORWARD -i vmbr0 -p tcp -d 10.10.10.11 --dport 22 -j ACCEPT || true
+post-up   iptables -C FORWARD -i vmbr0 -p tcp -d 10.10.10.101 --dport 22 -j ACCEPT || iptables -A FORWARD -i vmbr0 -p tcp -d 10.10.10.101 --dport 22 -j ACCEPT
+post-down iptables -D FORWARD -i vmbr0 -p tcp -d 10.10.10.101 --dport 22 -j ACCEPT || true
 ```
 
 The explicit FORWARD rules above are for inbound DNAT traffic. They are not per-VM outbound NAT rules.

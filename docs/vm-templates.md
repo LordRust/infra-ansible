@@ -35,6 +35,8 @@ The template itself should remain generic.
 
 ## Current templates
 
+The Proxmox 100-series is reserved for VM templates.
+
 - VMID 100 — older manually-created Debian 13 template; retain temporarily
 - VMID 101 — Debian 12 cloud-init template
 - VMID 102 — Debian 13 `genericcloud` cloud-init template; validated for new Debian 13 guests
@@ -97,13 +99,13 @@ There is normally no need to boot the generic template before conversion.
 
 ## Clone configuration
 
-Example:
+Example for a second admin VM using the Debian 13 template:
 
 ```bash
-qm clone 101 202 --name mongodb01 --full
+qm clone 102 202 --name infra-admin-02 --full
 
 qm set 202 \
-    --ipconfig0 ip=10.10.10.12/24,gw=10.10.10.1
+    --ipconfig0 ip=10.10.10.11/24,gw=10.10.10.1
 
 qm set 202 --nameserver "10.212.226.10 10.212.226.11"
 qm set 202 --ciuser jonas
