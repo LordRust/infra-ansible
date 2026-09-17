@@ -37,8 +37,9 @@ The template itself should remain generic.
 
 - VMID 100 — older manually-created Debian 13 template; retain temporarily
 - VMID 101 — Debian 12 cloud-init template
+- VMID 102 — Debian 13 `genericcloud` cloud-init template; validated for new Debian 13 guests
 
-Create a new Debian 13 genericcloud template for future Debian 13 guests, then retire VMID 100 after validation.
+Retire VMID 100 after any remaining users of the older template have been migrated or are no longer needed.
 
 ## Example template creation
 
@@ -74,6 +75,18 @@ qm set 101 --serial0 socket --vga serial0
 qm resize 101 scsi0 16G
 ```
 
+Explicitly suppress the Proxmox host's DNS search domain on these NAT-only VMs:
+
+```bash
+qm set 101 --searchdomain ''
+```
+
+If `searchdomain` is left unset, Proxmox generates cloud-init network data
+using the host search domain (`reg.skane.se`). Setting it to an empty string
+results in no `search:` entry in the generated cloud-init network
+configuration. `qm config` will show an explicit empty value as
+`searchdomain:`; this is expected.
+
 Then convert:
 
 ```bash
@@ -97,7 +110,9 @@ qm set 202 --ciuser jonas
 qm set 202 --sshkey /path/to/id_ed25519.pub
 ```
 
-Do not configure a search domain for the current NAT-only test VMs.
+The empty `searchdomain` should normally be inherited from the template.
+Verify that the generated network data has no `search:` entry rather than
+relying on an unset VM option.
 
 Before first boot, verify generated cloud-init content:
 
@@ -112,6 +127,10 @@ Then:
 qm start 202
 ```
 
+SSH can briefly return `Connection refused` while the guest is still
+completing its first boot. Once cloud-init and `ssh.service` have finished
+starting, key-based login should work normally.
+
 ## First-boot rule
 
 Set at least the following **before first boot**:
@@ -122,6 +141,9 @@ Set at least the following **before first boot**:
 - SSH public key
 
 Cloud-init user/key setup is generally once-per-instance. Adding the key only after the guest has already completed first boot may not update the user's `authorized_keys` automatically.
+
+A console password is not required for normal deployment; the Debian generic
+cloud image is intended to be accessed using the cloud-init-provisioned SSH key.
 
 ## Existing manually-created guests
 
