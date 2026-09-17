@@ -58,9 +58,9 @@
     enabled: true
     state: started
 
-- name: Add development users to docker group
+- name: Add selected users to docker group
   ansible.builtin.user:
     name: "{{ item }}"
     groups: docker
     append: true
-  loop: "{{ dev_users }}"
+  loop: "{{ docker_users | default([]) }}"

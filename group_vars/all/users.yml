@@ -1,13 +1,14 @@
 ---
+# Numeric identities must match the authoritative NFS environment.
 managed_groups:
   - name: cmd-bnf
-    gid: 1004       # replace with actual GID
+    gid: 1004
 
 managed_users:
   - name: jonas
-    uid: 119       # replace with actual UID
+    uid: 119
     primary_group: cmd-bnf
-    primary_gid: 1004   # replace with actual GID
+    primary_gid: 1004
 
   - name: jakob
     uid: 1029

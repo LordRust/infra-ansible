@@ -1,0 +1,7 @@
+---
+- name: Configure administration hosts
+  hosts: adminhosts
+  become: true
+
+  roles:
+    - base

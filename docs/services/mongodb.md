@@ -8,30 +8,24 @@ Current test host:
 
 ```text
 mongodb01
-10.10.10.12
-VMID 202
+10.10.10.32
+VMID 501
 ```
 
 It is cloned from the Debian 12 cloud-init template.
 
-Production MongoDB will reside on dedicated database machines.
+The database is reached directly by other VMs on `vmbr1`; no Proxmox DNAT rule
+is required for MongoDB traffic between the private VMs.
 
 ## Inventory
 
-Example:
-
 ```ini
-[mongodb]
-mongodb01 ansible_host=10.10.10.12
+[dbhosts]
+mongodb01 ansible_host=10.10.10.32
 ```
 
-Keep MongoDB-specific variables under:
-
-```text
-group_vars/mongodb/
-```
-
-and implementation under:
+MongoDB-specific per-host settings belong under `host_vars/`, and the
+implementation belongs under:
 
 ```text
 roles/mongodb/
@@ -39,31 +33,30 @@ roles/mongodb/
 
 ## Playbook
 
-Use a dedicated playbook rather than adding MongoDB to `dev-base.yml`.
-
-Example:
-
-```yaml
-- name: Configure MongoDB servers
-  hosts: mongodb
-  become: true
-
-  roles:
-    - base
-    - mongodb
-```
-
-Run with:
+Use the dedicated database playbook:
 
 ```bash
-ansible-playbook -i inventory.ini mongodb.yml
+ansible-playbook -i inventory.ini db-base.yml
 ```
+
+The playbook applies both the generic `base` role and the `mongodb` role.
 
 ## Installation policy
 
-Use MongoDB's official repository/packages for supported guest operating systems rather than an unrelated distribution package.
+Use MongoDB's official repository/packages for supported guest operating
+systems rather than an unrelated distribution package.
 
-Before changing the MongoDB guest OS version, verify current MongoDB vendor support for that Debian/Ubuntu release.
+The current role installs MongoDB 8.0 on Debian 12 (`bookworm`) and binds it to
+loopback plus the host's private address.
+
+Authentication is enabled by default in the role. The development-only
+`mongodb01` host deliberately overrides this in `host_vars/mongodb01.yml`:
+
+```yaml
+mongodb_authorization: disabled
+```
+
+Do not use that override for production database hosts.
 
 ## Production-oriented variables
 

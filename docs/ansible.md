@@ -2,7 +2,7 @@
 
 ## Control host
 
-`infra-admin-01` is the Ansible control host.
+`infra-admin-01` and `infra-admin-02` are administration hosts. The cloud-init bootstrap account on managed VMs is `ansible`.
 
 Repository:
 
@@ -14,6 +14,7 @@ Normal execution:
 
 ```bash
 ansible-playbook -i inventory.ini dev-base.yml
+ansible-playbook -i inventory.ini db-base.yml
 ```
 
 Useful checks:
@@ -33,14 +34,20 @@ Group machines by function.
 Example:
 
 ```ini
-[devhosts]
-devvm01 ansible_host=10.10.10.11
+[adminhosts]
+infra-admin-01 ansible_host=10.10.10.10
+infra-admin-02 ansible_host=10.10.10.11
 
-[mongodb]
-mongodb01 ansible_host=10.10.10.12
+[devhosts]
+dev01 ansible_host=10.10.10.101
+dev02 ansible_host=10.10.10.102
+dev03 ansible_host=10.10.10.103
+
+[dbhosts]
+mongodb01 ansible_host=10.10.10.32
 
 [all:vars]
-ansible_user=jonas
+ansible_user=ansible
 ansible_python_interpreter=/usr/bin/python3
 ```
 
@@ -55,16 +62,19 @@ infra-ansible/
 ├── README.md
 ├── docs/
 ├── inventory.ini
+├── admin-base.yml
 ├── dev-base.yml
+├── db-base.yml
 ├── group_vars/
 │   ├── all/
-│   ├── devhosts/
-│   └── mongodb/
+│   │   └── users.yml
+│   └── devhosts/
 ├── host_vars/
 └── roles/
     ├── base/
     ├── docker/
     ├── apptainer/
+    ├── mongodb/
     ├── nfs-client/
     └── smb-client/
 ```
@@ -82,17 +92,32 @@ group_vars/devhosts/
 └── smb_mounts.yml
 ```
 
-Example:
+Development-only variables remain under `group_vars/devhosts/`, for example:
 
 ```yaml
-dev_users:
+docker_users:
   - jonas
   - jakob
 
 apptainer_version: "1.5.3"
 ```
 
+Human users shared across machine classes are defined in
+`group_vars/all/users.yml`. Their UID and GID values must match the
+authoritative NFS environment.
+
 Keep environment-specific values in variables rather than hard-coding them inside reusable roles.
+
+## Bootstrap and human accounts
+
+Cloud-init creates the local `ansible` account used for provisioning and
+recovery. It is deliberately separate from normal human accounts and does not
+need to share the NFS numeric identity scheme.
+
+The `base` role creates human accounts such as `jonas` and `jakob`. Their
+numeric UID/GID values are defined centrally in `group_vars/all/users.yml`;
+NFS ownership is numeric, so these values must remain consistent across all
+NFS clients.
 
 ## Base role
 
@@ -104,7 +129,7 @@ The base role should contain generic machine configuration such as:
 - `curl`
 - `ca-certificates`
 - `sudo`
-- common users/groups
+- common users/groups with stable UID/GID values
 - optionally `qemu-guest-agent`
 
 ## Docker

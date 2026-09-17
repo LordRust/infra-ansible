@@ -37,9 +37,9 @@ Current target assignments start as follows:
 | `infra-admin-01` | `10.10.10.10` |
 | `infra-admin-02` | `10.10.10.11` |
 | `mongodb01` | `10.10.10.32` |
-| `devvm01` | `10.10.10.101` |
-| `devvm02` | `10.10.10.102` |
-| `devvm03` | `10.10.10.103` |
+| `dev01` | `10.10.10.101` |
+| `dev02` | `10.10.10.102` |
+| `dev03` | `10.10.10.103` |
 
 New and rebuilt VMs should follow these ranges. Existing VMs may temporarily
 retain older addresses while being migrated or retired.
@@ -76,10 +76,10 @@ post-up   iptables -C FORWARD -i vmbr0 -p tcp -d 10.10.10.10 --dport 22 -j ACCEP
 post-down iptables -D FORWARD -i vmbr0 -p tcp -d 10.10.10.10 --dport 22 -j ACCEPT || true
 ```
 
-Example for `devvm01`:
+Example for `dev01`:
 
 ```ini
-# devvm01
+# dev01
 post-up   iptables -t nat -C PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22 || iptables -t nat -A PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22
 post-down iptables -t nat -D PREROUTING -i vmbr0 -p tcp --dport 8802 -j DNAT --to-destination 10.10.10.101:22 || true
 

@@ -31,7 +31,9 @@ set per-VM cloud-init values
 first boot
 ```
 
-The template itself should remain generic.
+The template itself should remain generic. Cloud-init creates only the
+bootstrap administration account `ansible`; normal human accounts are created
+later by Ansible with explicitly managed UID/GID values.
 
 ## Current templates
 
@@ -81,6 +83,7 @@ Explicitly suppress the Proxmox host's DNS search domain on these NAT-only VMs:
 
 ```bash
 qm set 101 --searchdomain ''
+qm set 101 --ciuser ansible
 ```
 
 If `searchdomain` is left unset, Proxmox generates cloud-init network data
@@ -108,7 +111,7 @@ qm set 202 \
     --ipconfig0 ip=10.10.10.11/24,gw=10.10.10.1
 
 qm set 202 --nameserver "10.212.226.10 10.212.226.11"
-qm set 202 --ciuser jonas
+qm set 202 --ciuser ansible
 qm set 202 --sshkey /path/to/id_ed25519.pub
 ```
 
@@ -139,13 +142,33 @@ Set at least the following **before first boot**:
 
 - IP address and gateway
 - DNS servers
-- cloud-init user
+- cloud-init bootstrap user (`ansible`)
 - SSH public key
 
 Cloud-init user/key setup is generally once-per-instance. Adding the key only after the guest has already completed first boot may not update the user's `authorized_keys` automatically.
 
 A console password is not required for normal deployment; the Debian generic
 cloud image is intended to be accessed using the cloud-init-provisioned SSH key.
+
+For the existing cloud-image templates, set the bootstrap username directly on
+the templates before making new clones:
+
+```bash
+qm set 101 --ciuser ansible
+qm set 102 --ciuser ansible
+```
+
+Retain the intended SSH public key configuration. Verify the generated cloud-init
+user data after changing the template:
+
+```bash
+qm cloudinit dump 101 user
+qm cloudinit dump 102 user
+```
+
+The `ansible` bootstrap account is deliberately separate from human accounts
+such as `jonas`; the latter are created by Ansible with NFS-compatible numeric
+UID/GID values.
 
 ## Existing manually-created guests
 

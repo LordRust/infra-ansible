@@ -30,7 +30,7 @@
     name: "{{ item.name }}"
     uid: "{{ item.uid }}"
     group: "{{ item.primary_group }}"
-    groups: dev
+    groups: "{{ item.groups | default(omit) }}"
     append: true
     shell: /bin/bash
     create_home: true

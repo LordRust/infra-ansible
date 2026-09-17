@@ -44,9 +44,9 @@ Target organization for the current machines:
 |---:|---|---|---|
 | 201 | `infra-admin-01` | `10.10.10.10` | Ansible control host |
 | 202 | `infra-admin-02` | `10.10.10.11` | Ansible control host |
-| 301 | `devvm01` | `10.10.10.101` | Development VM |
-| 302 | `devvm02` | `10.10.10.102` | Development VM |
-| 303 | `devvm03` | `10.10.10.103` | Development VM |
+| 301 | `dev01` | `10.10.10.101` | Development VM |
+| 302 | `dev02` | `10.10.10.102` | Development VM |
+| 303 | `dev03` | `10.10.10.103` | Development VM |
 | 501 | `mongodb01` | `10.10.10.32` | MongoDB test VM |
 
 Existing VMs may temporarily retain older VMIDs or addresses while they are
@@ -76,7 +76,7 @@ Responsible for:
 
 Responsible for initial bootstrap only:
 
-- initial user
+- bootstrap administration user (`ansible`)
 - SSH public key
 - static address
 - gateway
@@ -87,7 +87,7 @@ Responsible for initial bootstrap only:
 
 Responsible for persistent guest configuration:
 
-- users and groups
+- human users and groups, including stable UID/GID values for NFS
 - packages
 - external package repositories
 - NFS/SMB mounts

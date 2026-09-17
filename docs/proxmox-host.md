@@ -30,7 +30,7 @@ Current SSH mapping:
 | Host port | Guest | Guest address | Guest port |
 |---:|---|---|---:|
 | 8801 | `infra-admin-01` | `10.10.10.10` | 22 |
-| 8802 | `devvm01` | `10.10.10.11` | 22 |
+| 8802 | `dev01` | `10.10.10.101` | 22 |
 
 Add further mappings explicitly as needed.
 
