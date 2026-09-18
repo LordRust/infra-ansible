@@ -6,7 +6,7 @@ managed_groups:
 
 managed_users:
   - name: jonas
-    uid: 119
+    uid: 1009
     primary_group: cmd-bnf
     primary_gid: 1004
     ssh_keys:
