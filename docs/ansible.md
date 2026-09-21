@@ -15,6 +15,7 @@ Normal execution:
 ```bash
 ansible-playbook -i inventory.ini dev-base.yml
 ansible-playbook -i inventory.ini db-base.yml
+ansible-playbook -i inventory.ini fs-base.yml
 ```
 
 Useful checks:
@@ -46,6 +47,9 @@ dev03 ansible_host=10.10.10.103
 [dbhosts]
 mongodb01 ansible_host=10.10.10.32
 
+[fileservers]
+infra-fs-01 ansible_host=10.10.10.16
+
 [all:vars]
 ansible_user=ansible
 ansible_python_interpreter=/usr/bin/python3
@@ -65,6 +69,8 @@ infra-ansible/
 ├── admin-base.yml
 ├── dev-base.yml
 ├── db-base.yml
+├── fs-base.yml
+├── requirements.yml
 ├── group_vars/
 │   ├── all/
 │   │   └── users.yml
@@ -75,7 +81,9 @@ infra-ansible/
     ├── docker/
     ├── apptainer/
     ├── mongodb/
+    ├── local-filesystem/
     ├── nfs-client/
+    ├── nfs-server/
     └── smb-client/
 ```
 
@@ -107,6 +115,38 @@ Human users shared across machine classes are defined in
 authoritative NFS environment.
 
 Keep environment-specific values in variables rather than hard-coding them inside reusable roles.
+
+Install the collections used by the roles with:
+
+```bash
+ansible-galaxy collection install -r requirements.yml
+```
+
+## Attached filesystems
+
+The `local-filesystem` role manages filesystems on virtual disks that Proxmox
+has already attached to a guest. Host variables supply the persistent device
+path, filesystem label, type, and mount point. For example:
+
+```yaml
+local_filesystems:
+  - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+    label: local
+    path: /local
+    fstype: ext4
+    opts: defaults
+```
+
+The role refuses a device containing a different filesystem type, never sets
+`force: true`, mounts by filesystem label, and grows an ext4 filesystem when
+the virtual disk has been enlarged. Confirm the `by-id` path in the guest
+before the first run; do not assume `/dev/sdb` is stable.
+
+The `nfs-server` role manages `/etc/exports.d/ansible.exports`. It removes a
+matching legacy entry from `/etc/exports` when adopting a manually configured
+export. It also requires every exported path to be a mounted filesystem,
+preventing an accidental export of the empty directory beneath a missing
+data-disk mount.
 
 ## Bootstrap and human accounts
 

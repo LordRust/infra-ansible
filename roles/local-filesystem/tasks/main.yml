@@ -1,0 +1,108 @@
+---
+- name: Install ext4 filesystem tools
+  ansible.builtin.apt:
+    name: e2fsprogs
+    state: present
+  when: local_filesystems | length > 0
+
+- name: Check local filesystem devices
+  ansible.builtin.stat:
+    path: "{{ item.device }}"
+    follow: true
+  loop: "{{ local_filesystems }}"
+  register: local_filesystem_devices
+
+- name: Require every configured local filesystem device
+  ansible.builtin.assert:
+    that:
+      - item.stat.exists
+      - item.stat.isblk | default(false)
+    fail_msg: >-
+      {{ item.item.device }} is not a block device. Check the persistent
+      /dev/disk/by-id path before continuing; do not substitute an unverified
+      /dev/sdX name.
+  loop: "{{ local_filesystem_devices.results }}"
+  loop_control:
+    label: "{{ item.item.device }}"
+
+- name: Read existing filesystem types
+  ansible.builtin.command:
+    argv:
+      - blkid
+      - -o
+      - value
+      - -s
+      - TYPE
+      - "{{ item.device }}"
+  loop: "{{ local_filesystems }}"
+  register: local_filesystem_types
+  changed_when: false
+  failed_when: false
+
+- name: Refuse to overwrite a different filesystem type
+  ansible.builtin.assert:
+    that:
+      - item.rc in [0, 2]
+      - item.rc == 2 or item.stdout == item.item.fstype
+    fail_msg: >-
+      Could not safely treat {{ item.item.device }} as blank or as
+      {{ item.item.fstype }} (blkid rc={{ item.rc }}, type=
+      {{ item.stdout | default('unknown') }}). The role will not reformat it.
+  loop: "{{ local_filesystem_types.results }}"
+  loop_control:
+    label: "{{ item.item.device }}"
+
+- name: Create or grow local filesystems
+  community.general.filesystem:
+    dev: "{{ item.device }}"
+    fstype: "{{ item.fstype }}"
+    opts: "-L {{ item.label }}"
+    resizefs: true
+    force: false
+    state: present
+  loop: "{{ local_filesystems }}"
+
+- name: Read filesystem labels
+  ansible.builtin.command:
+    argv:
+      - blkid
+      - -o
+      - value
+      - -s
+      - LABEL
+      - "{{ item.device }}"
+  loop: "{{ local_filesystems }}"
+  register: local_filesystem_labels
+  changed_when: false
+
+- name: Require the configured filesystem labels
+  ansible.builtin.assert:
+    that:
+      - item.stdout == item.item.label
+    fail_msg: >-
+      {{ item.item.device }} has label {{ item.stdout | default('none') }},
+      expected {{ item.item.label }}. Correct the existing label explicitly
+      before continuing.
+  loop: "{{ local_filesystem_labels.results }}"
+  loop_control:
+    label: "{{ item.item.device }}"
+
+- name: Configure and mount local filesystems
+  ansible.posix.mount:
+    path: "{{ item.path }}"
+    src: "LABEL={{ item.label }}"
+    fstype: "{{ item.fstype }}"
+    opts: "{{ item.opts | default('defaults') }}"
+    dump: "0"
+    passno: "2"
+    state: mounted
+  loop: "{{ local_filesystems }}"
+
+- name: Set local filesystem root permissions
+  ansible.builtin.file:
+    path: "{{ item.path }}"
+    state: directory
+    owner: "{{ item.owner | default('root') }}"
+    group: "{{ item.group | default('root') }}"
+    mode: "{{ item.mode | default('0755') }}"
+  loop: "{{ local_filesystems }}"

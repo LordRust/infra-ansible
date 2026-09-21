@@ -4,6 +4,7 @@
 
   roles:
     - base
+    - local-filesystem
     - nfs-client
     # - smb-client
     - docker

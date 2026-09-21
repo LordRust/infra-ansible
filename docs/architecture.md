@@ -47,6 +47,7 @@ Target organization for the current machines:
 | 301 | `dev01` | `10.10.10.101` | Development VM |
 | 302 | `dev02` | `10.10.10.102` | Development VM |
 | 303 | `dev03` | `10.10.10.103` | Development VM |
+| 401 | `infra-fs-01` | `10.10.10.16` | NFS file server for `/fs3` |
 | 501 | `mongodb01` | `10.10.10.32` | MongoDB test VM |
 
 Existing VMs may temporarily retain older VMIDs or addresses while they are
@@ -90,7 +91,9 @@ Responsible for persistent guest configuration:
 - human users and groups, including stable UID/GID values for NFS
 - packages
 - external package repositories
+- local filesystems on attached virtual disks
 - NFS/SMB mounts
+- NFS exports
 - Docker
 - Apptainer
 - service configuration

@@ -1,0 +1,37 @@
+---
+- name: Install NFS server
+  ansible.builtin.apt:
+    name: nfs-kernel-server
+    state: present
+
+- name: Require exported paths to be mounted filesystems
+  ansible.builtin.command:
+    argv:
+      - mountpoint
+      - --quiet
+      - "{{ item.path }}"
+  loop: "{{ nfs_exports }}"
+  changed_when: false
+
+- name: Remove managed exports from the legacy exports file
+  ansible.builtin.lineinfile:
+    path: /etc/exports
+    regexp: "^\\s*{{ item.path | regex_escape }}\\s+"
+    state: absent
+  loop: "{{ nfs_exports }}"
+  notify: Reload NFS exports
+
+- name: Configure NFS exports
+  ansible.builtin.template:
+    src: exports.j2
+    dest: /etc/exports.d/ansible.exports
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Reload NFS exports
+
+- name: Enable and start NFS server
+  ansible.builtin.service:
+    name: nfs-kernel-server
+    enabled: true
+    state: started

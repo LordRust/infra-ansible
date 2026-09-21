@@ -5,6 +5,7 @@ nfs_mounts:
     src: rs-fs2.lunarc.lu.se:/disk
   - path: /fs3
     src: infra-fs-01:/srv/fs3
+    opts: rw,_netdev,x-systemd.automount,nofail
   - path: /access
     src: mtlucmds1.lund.skane.se:/access
   - path: /data

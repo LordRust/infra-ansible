@@ -1,0 +1,12 @@
+---
+local_filesystems:
+  - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+    label: fs3
+    path: /srv/fs3
+    fstype: ext4
+    opts: defaults
+
+nfs_exports:
+  - path: /srv/fs3
+    clients: 10.10.10.0/24
+    options: rw,sync,no_subtree_check

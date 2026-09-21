@@ -19,6 +19,10 @@ nfs_mounts:
 
   - path: /fs2
     src: rs-fs2.lunarc.lu.se:/disk
+
+  - path: /fs3
+    src: infra-fs-01:/srv/fs3
+    opts: rw,_netdev,x-systemd.automount,nofail
 ```
 
 Example role:
@@ -67,6 +71,32 @@ rather than as `10.10.10.x`.
 The NFS server `/etc/exports` must permit the Proxmox host address as appropriate.
 
 A previous `mount.nfs: Permission denied` problem was caused by server-side export permissions, not by the guest NFS client role.
+
+The locally hosted `/fs3` export is different: traffic between the development
+VMs and `infra-fs-01` remains on `10.10.10.0/24` and is not source-NATed.
+
+## Local NFS server
+
+`infra-fs-01` (`10.10.10.16`, VMID 401) mounts its dedicated data disk at
+`/srv/fs3` and exports it to the private VM network. Its host variables define:
+
+```yaml
+nfs_exports:
+  - path: /srv/fs3
+    clients: 10.10.10.0/24
+    options: rw,sync,no_subtree_check
+```
+
+Apply the server configuration with:
+
+```bash
+ansible-playbook -i inventory.ini fs-base.yml
+```
+
+The normal NFS `root_squash` behavior remains enabled because
+`no_root_squash` is not specified. Client access is read/write, while `/fs1`
+and `/fs2` retain the client role's read-only default unless they have an
+explicit `opts` override.
 
 ## SMB/CIFS
 

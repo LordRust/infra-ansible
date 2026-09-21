@@ -1,0 +1,9 @@
+---
+- name: Configure file server
+  hosts: fileservers
+  become: true
+
+  roles:
+    - base
+    - local-filesystem
+    - nfs-server
