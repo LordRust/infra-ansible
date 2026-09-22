@@ -9,3 +9,7 @@
     # - smb-client
     - docker
     - apptainer
+    - role: r
+      when: r_enabled | default(false)
+    - role: rstudio-server
+      when: rstudio_server_enabled | default(false)

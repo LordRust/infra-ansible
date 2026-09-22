@@ -1,0 +1,72 @@
+---
+- name: Verify supported Debian version
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - ansible_distribution_major_version == "13"
+    fail_msg: "R role currently supports Debian 13 only"
+
+- name: Install R repository prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - gnupg
+    state: present
+    update_cache: true
+
+- name: Ensure APT keyring directory exists
+  ansible.builtin.file:
+    path: /etc/apt/keyrings
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
+- name: Download CRAN signing key over HTTPS
+  ansible.builtin.get_url:
+    url: "{{ r_cran_key_url }}"
+    dest: "{{ r_cran_keyring }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Read CRAN signing key fingerprint
+  ansible.builtin.command:
+    argv:
+      - gpg
+      - --show-keys
+      - --with-colons
+      - --fingerprint
+      - "{{ r_cran_keyring }}"
+  register: r_cran_key_info
+  changed_when: false
+
+- name: Verify CRAN signing key fingerprint
+  ansible.builtin.assert:
+    that:
+      - r_cran_fingerprint in r_cran_key_info.stdout
+    fail_msg: "Downloaded CRAN signing key has an unexpected fingerprint"
+
+- name: Configure CRAN repository
+  ansible.builtin.copy:
+    dest: /etc/apt/sources.list.d/cran.sources
+    owner: root
+    group: root
+    mode: "0644"
+    content: |
+      Types: deb
+      URIs: https://cloud.r-project.org/bin/linux/debian/
+      Suites: {{ r_cran_suite }}/
+      Components:
+      Signed-By: {{ r_cran_keyring }}
+  register: r_cran_repository
+
+- name: Update APT cache after configuring CRAN
+  ansible.builtin.apt:
+    update_cache: true
+  when: r_cran_repository.changed
+
+- name: Install R
+  ansible.builtin.apt:
+    name: "{{ r_packages }}"
+    state: present

@@ -8,3 +8,5 @@ local_filesystems:
 sudo_users:
   - jonas
   - jakob
+r_enabled: true
+rstudio_server_enabled: true

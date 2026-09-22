@@ -1,0 +1,11 @@
+---
+rstudio_server_version: "2026.09.0-174"
+
+rstudio_server_package: >-
+  rstudio-server-{{ rstudio_server_version }}-amd64.deb
+
+rstudio_server_url: >-
+  https://download2.rstudio.org/server/jammy/amd64/{{ rstudio_server_package }}
+
+rstudio_server_bind_address: "127.0.0.1"
+rstudio_server_port: 8787

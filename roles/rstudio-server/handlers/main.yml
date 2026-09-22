@@ -1,0 +1,5 @@
+---
+- name: Restart RStudio Server
+  ansible.builtin.systemd_service:
+    name: rstudio-server
+    state: restarted

@@ -1,0 +1,67 @@
+---
+- name: Verify supported Debian version and architecture
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - ansible_distribution_major_version == "13"
+      - ansible_architecture == "x86_64"
+    fail_msg: "RStudio Server role currently supports Debian 13 amd64 only"
+
+- name: Install RStudio Server prerequisites
+  ansible.builtin.apt:
+    name:
+      - ca-certificates
+      - xz-utils
+    state: present
+
+- name: Download RStudio Server over HTTPS
+  ansible.builtin.get_url:
+    url: "{{ rstudio_server_url }}"
+    dest: "/var/tmp/{{ rstudio_server_package }}"
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Install RStudio Server
+  ansible.builtin.apt:
+    deb: "/var/tmp/{{ rstudio_server_package }}"
+    state: present
+  notify: Restart RStudio Server
+
+- name: Bind RStudio Server to localhost
+  ansible.builtin.lineinfile:
+    path: /etc/rstudio/rserver.conf
+    regexp: '^www-address='
+    line: "www-address={{ rstudio_server_bind_address }}"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart RStudio Server
+
+- name: Configure RStudio Server port
+  ansible.builtin.lineinfile:
+    path: /etc/rstudio/rserver.conf
+    regexp: '^www-port='
+    line: "www-port={{ rstudio_server_port }}"
+    create: true
+    owner: root
+    group: root
+    mode: "0644"
+  notify: Restart RStudio Server
+
+- name: Ensure RStudio Server is enabled and running
+  ansible.builtin.systemd_service:
+    name: rstudio-server
+    enabled: true
+    state: started
+
+- name: Apply pending RStudio Server configuration changes
+  ansible.builtin.meta: flush_handlers
+
+- name: Verify RStudio Server installation
+  ansible.builtin.command:
+    argv:
+      - rstudio-server
+      - verify-installation
+  changed_when: false

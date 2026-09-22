@@ -1,0 +1,10 @@
+---
+r_cran_fingerprint: "95C0FAF38DB3CCAD0C080A7BDC78B2DDEABC47B7"
+r_cran_key_url: >-
+  https://keyserver.ubuntu.com/pks/lookup?op=get&search=0x{{ r_cran_fingerprint }}
+r_cran_keyring: /etc/apt/keyrings/cran_debian_key.asc
+r_cran_suite: trixie-cran46
+
+r_packages:
+  - r-base
+  - r-base-dev
