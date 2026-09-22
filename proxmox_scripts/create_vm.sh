@@ -24,3 +24,4 @@ qm set "$vmid" --nameserver "10.212.226.10 10.212.226.11"
 qm set "$vmid" --searchdomain ""
 qm set "$vmid" --ciuser ansible
 qm set "$vmid" --sshkey "$ssh_key"
+qm set "$vmid" --cpu host

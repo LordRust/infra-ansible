@@ -62,3 +62,15 @@ iptables -S FORWARD
 ```
 
 `bridge link` lists bridge ports, not bridge devices. A bridge with `bridge-ports none` may therefore not appear in `bridge link`.
+
+Check for old CPU, mongo does really want Haskell and later with AVX2
+On the host
+```
+lscpu | grep 'Model name'
+grep -m1 '^flags' /proc/cpuinfo | tr ' ' '\n' | grep -E '^avx2?$'
+
+And the db VM
+```
+systemctl status mongod --no-pager
+mongosh
+```
