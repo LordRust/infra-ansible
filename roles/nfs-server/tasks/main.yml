@@ -4,6 +4,14 @@
     name: nfs-kernel-server
     state: present
 
+- name: Create NFS exports directory
+  ansible.builtin.file:
+    path: /etc/exports.d
+    state: directory
+    owner: root
+    group: root
+    mode: "0755"
+
 - name: Require exported paths to be mounted filesystems
   ansible.builtin.command:
     argv:
