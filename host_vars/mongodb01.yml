@@ -1,2 +1,5 @@
 ---
 mongodb_authorization: disabled
+
+sudo_users:
+  - jonas

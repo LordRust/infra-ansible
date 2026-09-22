@@ -5,3 +5,6 @@ local_filesystems:
     path: /local
     fstype: ext4
     opts: defaults
+sudo_users:
+  - jonas
+  - jakob
