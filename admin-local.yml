@@ -1,0 +1,30 @@
+---
+- name: Configure local Ansible controller
+  hosts: localhost
+  connection: local
+  gather_facts: false
+
+  vars:
+    controller_ssh_dir: "{{ lookup('ansible.builtin.env', 'HOME') }}/.ssh"
+
+  tasks:
+    - name: Ensure local SSH directory exists
+      ansible.builtin.file:
+        path: "{{ controller_ssh_dir }}"
+        state: directory
+        mode: "0700"
+
+    - name: Add inventory hosts to local known_hosts
+      ansible.builtin.known_hosts:
+        path: "{{ controller_ssh_dir }}/known_hosts"
+        name: "{{ hostvars[item].ansible_host | default(item) }}"
+        key: >-
+          {{ lookup(
+               'ansible.builtin.pipe',
+               'ssh-keyscan -qH -T 5 ' ~
+               ((hostvars[item].ansible_host | default(item)) | quote)
+             ) }}
+        state: present
+      loop: "{{ groups['all'] }}"
+      loop_control:
+        label: "{{ hostvars[item].ansible_host | default(item) }}"
