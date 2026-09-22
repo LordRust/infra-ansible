@@ -2,13 +2,36 @@
 
 ## Control host
 
-`infra-admin-01` and `infra-admin-02` are administration hosts. The cloud-init bootstrap account on managed VMs is `ansible`.
+`infra-admin-01` and `infra-admin-02` are administration hosts. `infra-admin-01` is an unprivileged Debian 13 LXC container; `infra-admin-02` remains a KVM VM.
+
+The bootstrap account used by Ansible on managed guests is `ansible`. KVM guests receive this account and its SSH key through cloud-init. LXC guests receive the equivalent bootstrap setup directly through `pct`; see [LXC containers](lxc.md).
 
 Repository:
 
 ```text
 ~/infra-ansible
 ```
+
+### Rebuilding an Ansible controller
+
+After the Proxmox-side guest bootstrap has created the `ansible` account and human access has been established, install the small set of controller tools manually:
+
+```bash
+sudo apt update
+sudo apt full-upgrade -y
+sudo apt install -y ansible git tmux vim curl rsync jq
+```
+
+Clone the repository, install its Ansible collection requirements, and populate the invoking user's SSH `known_hosts` from the inventory:
+
+```bash
+git clone git@github.com:LordRust/infra-ansible.git
+cd infra-ansible
+ansible-galaxy collection install -r requirements.yml
+ansible-playbook -i inventory.ini admin-local.yml
+```
+
+`admin-local.yml` runs only on the controller itself. It scans the `ansible_host` addresses in `inventory.ini` with `ssh-keyscan` and updates `~/.ssh/known_hosts` idempotently. This avoids an interactive first-connection prompt when Ansible contacts a newly provisioned host. `ssh-keyscan` is a trust-on-first-use convenience; it does not independently authenticate the host key.
 
 Normal execution:
 
@@ -67,10 +90,12 @@ infra-ansible/
 ├── docs/
 ├── inventory.ini
 ├── admin-base.yml
+├── admin-local.yml
 ├── dev-base.yml
 ├── db-base.yml
 ├── fs-base.yml
 ├── requirements.yml
+├── proxmox_scripts/
 ├── group_vars/
 │   ├── all/
 │   │   └── users.yml
@@ -150,9 +175,7 @@ data-disk mount.
 
 ## Bootstrap and human accounts
 
-Cloud-init creates the local `ansible` account used for provisioning and
-recovery. It is deliberately separate from normal human accounts and does not
-need to share the NFS numeric identity scheme.
+The local `ansible` account is used for provisioning and recovery. Cloud-init creates it on KVM guests; the LXC creation script creates the same account directly with `pct`. It is deliberately separate from normal human accounts and does not need to share the NFS numeric identity scheme.
 
 The `base` role creates human accounts such as `jonas` and `jakob`. Their
 numeric UID/GID values are defined centrally in `group_vars/all/users.yml`;

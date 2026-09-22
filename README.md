@@ -1,6 +1,6 @@
 # infra-ansible
 
-Configuration and operational documentation for the Proxmox-based test and development VM environment.
+Configuration and operational documentation for the Proxmox-based test and development guest environment.
 
 The repository has two purposes:
 
@@ -17,6 +17,7 @@ The documentation should describe the **current known-good state**. Troubleshoot
 - [Networking](docs/networking.md)
 - [Storage](docs/storage.md)
 - [VM templates and cloud-init](docs/vm-templates.md)
+- [LXC containers](docs/lxc.md)
 - [Ansible conventions](docs/ansible.md)
 - [NFS and SMB](docs/nfs-smb.md)
 - [MongoDB](docs/services/mongodb.md)
@@ -24,14 +25,14 @@ The documentation should describe the **current known-good state**. Troubleshoot
 ## Operating model
 
 ```text
-official Debian cloud image
+Debian image/template
         |
         v
-Proxmox template
+Proxmox VM or LXC
         |
         v
-cloud-init
-(machine identity, network, initial SSH access)
+bootstrap
+(cloud-init for VMs; pct setup for LXC)
         |
         v
 Ansible
@@ -42,4 +43,4 @@ application-specific tooling
 (Docker Compose, Apptainer, conda/mamba, etc.)
 ```
 
-VMs should be treated as reproducible and replaceable. Persistent configuration belongs in this repository rather than being maintained manually inside individual guests.
+Guests should be treated as reproducible and replaceable. Persistent configuration belongs in this repository rather than being maintained manually inside individual guests.
