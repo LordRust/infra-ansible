@@ -132,6 +132,9 @@ docker_users:
   - jonas
   - jakob
 
+sudo_users:
+  - jonas
+
 apptainer_version: "1.5.3"
 ```
 
@@ -181,6 +184,35 @@ The `base` role creates human accounts such as `jonas` and `jakob`. Their
 numeric UID/GID values are defined centrally in `group_vars/all/users.yml`;
 NFS ownership is numeric, so these values must remain consistent across all
 NFS clients.
+
+### Passwordless sudo
+
+The `base` role grants passwordless sudo to the users listed in `sudo_users`.
+It writes the complete list to `/etc/sudoers.d/ansible-sudo-users` and validates
+the generated file with `visudo` before replacing the active configuration.
+
+To grant sudo on every development machine, set the group variable in
+`group_vars/devhosts/devhosts.yml`:
+
+```yaml
+sudo_users:
+  - jonas
+```
+
+To use a different list on one machine, define it in that machine's host
+variables. Host variables replace the group list rather than extending it, so
+include every user who should retain sudo on that host:
+
+```yaml
+# host_vars/dev01.yml
+sudo_users:
+  - jonas
+  - jakob
+```
+
+Removing a user from the effective list removes that user's rule the next time
+the applicable playbook runs. An empty list leaves the managed sudoers file
+empty and grants no passwordless sudo through this mechanism.
 
 ## Base role
 

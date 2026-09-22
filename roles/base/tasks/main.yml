@@ -43,3 +43,15 @@
     key: "{{ item.1 }}"
     state: present
   loop: "{{ managed_users | subelements('ssh_keys', skip_missing=True) }}"
+
+- name: Configure passwordless sudo users
+  ansible.builtin.copy:
+    dest: /etc/sudoers.d/ansible-sudo-users
+    content: |
+      {% for user in sudo_users %}
+      {{ user }} ALL=(ALL:ALL) NOPASSWD: ALL
+      {% endfor %}
+    owner: root
+    group: root
+    mode: "0440"
+    validate: /usr/sbin/visudo -cf %s

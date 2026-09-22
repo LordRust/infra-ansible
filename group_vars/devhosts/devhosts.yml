@@ -2,4 +2,7 @@ docker_users:
   - jonas
   - jakob
 
+sudo_users:
+  - jonas
+
 apptainer_version: "1.5.3"
