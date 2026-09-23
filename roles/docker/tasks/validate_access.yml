@@ -1,0 +1,6 @@
+---
+- name: Reject contradictory Docker access policy
+  ansible.builtin.assert:
+    that:
+      - docker_users | intersect(docker_revoked_users) | length == 0
+    fail_msg: "A user cannot be listed in both docker_users and docker_revoked_users"

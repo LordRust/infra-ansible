@@ -1,4 +1,7 @@
 ---
+- name: Validate explicit SSH access policy before making changes
+  ansible.builtin.import_tasks: validate_access.yml
+
 - name: Install base packages
   ansible.builtin.apt:
     name:
@@ -44,6 +47,13 @@
     key: "{{ item.1 }}"
     state: present
   loop: "{{ managed_users | subelements('ssh_keys', skip_missing=True) }}"
+
+- name: Remove explicitly revoked SSH keys
+  ansible.posix.authorized_key:
+    user: "{{ item.0.name }}"
+    key: "{{ item.1 }}"
+    state: absent
+  loop: "{{ managed_users | subelements('revoked_ssh_keys', skip_missing=True) }}"
 
 - name: Configure passwordless sudo users
   ansible.builtin.copy:

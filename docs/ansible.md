@@ -351,3 +351,22 @@ with an explanation. This does not waive validation on a real run. First-run
 check mode can still fail when packages/services depend on repositories or
 prerequisites that are only predicted, not installed. Run clean provisioning
 on disposable guests, then use check mode and immediate reruns for convergence.
+
+## Explicit access revocation
+
+SSH keys remain additive: deleting a key from `ssh_keys` alone does not revoke
+it. Add the complete public key to that user's optional `revoked_ssh_keys` list
+and remove it from `ssh_keys`. The role rejects conflicting grants/revocations,
+even when comments differ. Keep revocation entries while machines may still have
+old keys. Unlisted keys and the separate bootstrap account remain unchanged.
+
+Docker membership is also additive. To revoke it, remove the user from
+`docker_users` and add the username to `docker_revoked_users`. The role removes
+only supplementary Docker membership, preserving other groups; it refuses to
+silently replace a Docker primary group. Both lists default to empty.
+
+Revocation does not terminate established SSH sessions or processes that already
+hold group privileges. Users must end old sessions; administrators must separately
+handle active sessions when immediate revocation is required. Removing a human
+from `managed_users` does not remove their account, keys, files, or sudo rules.
+Account retirement remains an explicit operator procedure; review all four.

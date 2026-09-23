@@ -11,7 +11,7 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 3. Make development package provisioning self-contained.
 - [x] 4. Configure file servers before development clients.
 - [x] 5. Strengthen filesystem and NFS validation.
-- [ ] 6. Support explicit access revocation while keeping additions additive.
+- [x] 6. Support explicit access revocation while keeping additions additive.
 - [ ] 7. Add Proxmox provisioning preflight checks and recovery guidance.
 - [ ] 8. Add disposable guest smoke tests and record evidence.
 
@@ -44,3 +44,7 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
   exercises existing/blank devices, wrong types/labels, absent labels, and probe
   errors without device access. Real mounting, growth, and reboot/export behavior
   remain pending on disposable guests.
+
+- Commit 6: syntax and lint passed. Seven local policy cases exercised the
+  actual assertions, including same-key/different-comment conflicts and Docker
+  grant/revoke overlap. Actual guest membership/key removal remains pending.

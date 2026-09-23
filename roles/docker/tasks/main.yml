@@ -1,4 +1,7 @@
 ---
+- name: Validate explicit Docker access policy before making changes
+  ansible.builtin.import_tasks: validate_access.yml
+
 - name: Verify supported development platform
   ansible.builtin.assert:
     that:
@@ -84,3 +87,56 @@
     groups: docker
     append: true
   loop: "{{ docker_users | default([]) }}"
+
+- name: Read Docker supplementary membership
+  ansible.builtin.getent:
+    database: group
+    key: docker
+    fail_key: false
+  when: docker_revoked_users | length > 0
+
+- name: Read accounts with explicitly revoked Docker access
+  ansible.builtin.getent:
+    database: passwd
+    key: "{{ item }}"
+    fail_key: false
+  loop: "{{ docker_revoked_users }}"
+  register: docker_revoked_accounts
+
+- name: Refuse to change a revoked user's primary group implicitly
+  ansible.builtin.assert:
+    that:
+      - >-
+        not ansible_facts.getent_group.docker or
+        not item.ansible_facts.getent_passwd[item.item] or
+        item.ansible_facts.getent_passwd[item.item][2] != ansible_facts.getent_group.docker[1]
+    fail_msg: >-
+      {{ item.item }} uses docker as its primary group. Assign an appropriate
+      primary group explicitly before revoking Docker access.
+  loop: "{{ docker_revoked_accounts.results }}"
+  loop_control:
+    label: "{{ item.item }}"
+
+- name: Report Docker memberships that would be revoked
+  ansible.builtin.debug:
+    msg: "Would remove {{ item }} from the docker supplementary group"
+  loop: "{{ docker_revoked_users }}"
+  when:
+    - ansible_check_mode
+    - ansible_facts.getent_group.docker is not none
+    - item in ansible_facts.getent_group.docker[2].split(',')
+  changed_when: true
+
+- name: Remove explicitly revoked Docker supplementary memberships
+  ansible.builtin.command:
+    argv:
+      - gpasswd
+      - --delete
+      - "{{ item }}"
+      - docker
+  loop: "{{ docker_revoked_users }}"
+  when:
+    - not ansible_check_mode
+    - ansible_facts.getent_group.docker is not none
+    - item in ansible_facts.getent_group.docker[2].split(',')
+  changed_when: true

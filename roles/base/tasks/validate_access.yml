@@ -1,0 +1,19 @@
+---
+- name: Reject contradictory SSH key policy
+  ansible.builtin.assert:
+    that:
+      - >-
+        (item.ssh_keys | default([]) | map('regex_search', base_public_key_pattern) |
+         intersect(item.revoked_ssh_keys | default([]) |
+                   map('regex_search', base_public_key_pattern)) | length) == 0
+      - >-
+        none not in ((item.ssh_keys | default([]) + item.revoked_ssh_keys | default([])) |
+                     map('regex_search', base_public_key_pattern) | list)
+    fail_msg: >-
+      {{ item.name }} has an invalid public key or the same key both granted and
+      revoked. Key comments do not distinguish identities. Resolve this first.
+  vars:
+    base_public_key_pattern: '(?:ssh-|ecdsa-|sk-)[a-zA-Z0-9@._-]+\s+[A-Za-z0-9+/=]+'
+  loop: "{{ managed_users }}"
+  loop_control:
+    label: "{{ item.name }}"
