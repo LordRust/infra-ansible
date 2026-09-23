@@ -71,6 +71,11 @@ has passed. Record actual validation below; do not infer it from this checklist.
   failed because the service was already running. The role now waits for its
   configured listener, and the collection is pinned to 2.2.0. Fixture validation
   passed with the updated collection; a live rerun is still needed.
+- Follow-up: live smoke verification reached the NFS automount but could not
+  stat its mode-2770 export as client root, which is root-squashed by the server.
+  Verification and marker file operations now run as `smoke-user`. The data
+  task's existence check also runs as that user, preserving an existing marker
+  on rerun. Live verification and data checks remain pending.
 
 ## Local commit map
 

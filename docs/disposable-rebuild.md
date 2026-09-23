@@ -98,7 +98,8 @@ First-run check mode is not a substitute for step 3; see `ansible.md` for limits
 
 Optionally reboot these two verified disposable VMs, then repeat verification
 and the data test to exercise mount/service persistence. The verify playbook
-accesses the NFS path before checking it to trigger the configured automount.
+accesses the NFS path as `smoke-user` before checking it to trigger the
+configured automount; client root is squashed by the export.
 
 ## 4. Negative storage and export checks
 

@@ -12,12 +12,10 @@
         fail_msg: "Run after provisioning; this scenario writes only the disposable NFS marker."
   tasks:
     - name: Write marker as the unprivileged NFS identity without replacing existing data
+      become: true
+      become_user: smoke-user
       ansible.builtin.command:
         argv:
-          - runuser
-          - -u
-          - smoke-user
-          - --
           - sh
           - -c
           - 'printf "%s\n" "infra-ansible smoke data survives" > /smoke-fs/rebuild-marker'
@@ -26,6 +24,8 @@
       changed_when: smoke_marker_write is changed
 
     - name: Read the preserved marker
+      become: true
+      become_user: smoke-user
       ansible.builtin.slurp:
         src: /smoke-fs/rebuild-marker
       register: smoke_marker
