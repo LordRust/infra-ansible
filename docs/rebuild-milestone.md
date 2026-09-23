@@ -79,9 +79,13 @@ has passed. Record actual validation below; do not infer it from this checklist.
   check both run as `smoke-user`.
 - Controller report after commit `0f5ed5b`: the disposable guest `verify.yml`
   and `data.yml` playbooks both passed. Their detailed recaps were not provided.
-  A second provisioning run, reboot persistence, and the negative storage/export
-  checks in `docs/disposable-rebuild.md` have not been reported yet, so the full
-  runtime acceptance checklist remains open.
+  The repeated provisioning and data commands also passed, but the final
+  provisioning check-mode run stopped at the CRAN key download: the keyserver
+  returned 405 to `get_url`'s HEAD request. The R role now skips that download
+  in check mode and continues to inspect and verify the key already on disk.
+  A successful check-mode rerun, reboot persistence, and the negative
+  storage/export checks in `docs/disposable-rebuild.md` have not been reported
+  yet, so the full runtime acceptance checklist remains open.
 
 ## Local commit map
 

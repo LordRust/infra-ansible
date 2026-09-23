@@ -30,6 +30,8 @@
     owner: root
     group: root
     mode: "0644"
+  # The keyserver accepts GET but rejects get_url's check-mode HEAD request.
+  when: not ansible_check_mode
 
 - name: Inspect CRAN fingerprint prerequisites
   ansible.builtin.stat:

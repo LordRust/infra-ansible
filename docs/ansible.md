@@ -346,6 +346,8 @@ is configured in `local_filesystems`; a real run must find it mounted. Generated
 exports also include `mountpoint`, so export processing refuses an unmounted
 backing directory independently of the Ansible invocation.
 
+The CRAN key download is skipped in check mode because the keyserver rejects
+`get_url`'s HEAD request. An existing key still undergoes fingerprint validation.
 If GPG or the CRAN key is absent in check mode, fingerprint validation is deferred
 with an explanation. This does not waive validation on a real run. First-run
 check mode can still fail when packages/services depend on repositories or
