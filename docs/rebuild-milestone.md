@@ -7,7 +7,7 @@ Debian 13 file server and development VM, not existing data disks.
 ## Commit checklist
 
 - [x] 1. Streamline agent guidance and record this milestone.
-- [ ] 2. Add repeatable local validation and tested dependency versions.
+- [x] 2. Add repeatable local validation and tested dependency versions.
 - [ ] 3. Make development package provisioning self-contained.
 - [ ] 4. Configure file servers before development clients.
 - [ ] 5. Strengthen filesystem and NFS validation.
@@ -27,3 +27,8 @@ has passed. Record actual validation below; do not infer it from this checklist.
 
 SMB completion, backup automation, production hardening, dedicated MongoDB/LXC
 runtime tests, and migration tooling for the larger QEMU/KVM environment.
+
+- Commit 2: all five playbook syntax checks, YAML lint, basic Ansible lint,
+  bash syntax, and ShellCheck passed. Six narrowly scoped lint exceptions retain
+  existing public names. Inventory graph passed; full variable loading correctly
+  stops with a clear error when Vault credentials are missing.

@@ -1,0 +1,7 @@
+# Preserve established local role names and the public sudo_users variable.
+roles/local-filesystem role-name
+roles/nfs-client role-name
+roles/nfs-server role-name
+roles/rstudio-server role-name
+roles/smb-client role-name
+roles/base/defaults/main.yml var-naming[no-role-prefix]

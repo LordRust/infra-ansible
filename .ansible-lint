@@ -1,0 +1,8 @@
+---
+profile: basic
+exclude_paths:
+  - .git/
+  - .ansible/
+  - .cache/
+  - patch/
+  - group_vars/devhosts/vault.yml  # Ciphertext; inventory validation decrypts it.
