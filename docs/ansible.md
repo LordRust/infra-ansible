@@ -288,7 +288,7 @@ On Debian 13 install `ansible-core ansible-lint yamllint shellcheck` with APT,
 then run `ansible-galaxy collection install -r requirements.yml`. Checks never
 install dependencies automatically. Tested baseline: ansible-core 2.19.11,
 ansible-lint 25.6.1+really25.2.1, yamllint 1.37.1, ShellCheck 0.10.0,
-ansible.posix 2.1.0, community.general 11.2.1. Collection versions are pinned;
+ansible.posix 2.2.0, community.general 11.2.1. Collection versions are pinned;
 APT tools may receive distribution fixes.
 
 Run from any directory:

@@ -59,9 +59,9 @@
 - name: Apply pending RStudio Server configuration changes
   ansible.builtin.meta: flush_handlers
 
-- name: Verify RStudio Server installation
-  ansible.builtin.command:
-    argv:
-      - rstudio-server
-      - verify-installation
-  changed_when: false
+- name: Wait for RStudio Server to listen on its configured address
+  ansible.builtin.wait_for:
+    host: "{{ rstudio_server_bind_address }}"
+    port: "{{ rstudio_server_port }}"
+    state: started
+    timeout: 30

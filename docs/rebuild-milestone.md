@@ -65,6 +65,12 @@ has passed. Record actual validation below; do not infer it from this checklist.
   as an invalid `copy` task. The base role now renders a comment-only sudoers
   file in that case. A local regression test checks empty and populated lists
   with `visudo`; the full fixture validation suite passed with 11 tests.
+- Follow-up: the filesystem smoke task mounted successfully but emitted an
+  `ansible.posix.mount` deprecation warning with collection 2.1.0. The first
+  development guest run reached RStudio Server, where `verify-installation`
+  failed because the service was already running. The role now waits for its
+  configured listener, and the collection is pinned to 2.2.0. Fixture validation
+  passed with the updated collection; a live rerun is still needed.
 
 ## Local commit map
 
