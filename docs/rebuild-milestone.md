@@ -93,6 +93,11 @@ has passed. Record actual validation below; do not infer it from this checklist.
   verification, and the client smoke playbooks check the server mount/export
   before touching NFS. Reboot persistence and remaining negative checks are
   not yet recorded.
+- Controller report after commit `9300461`: the export was restored and the
+  resumed smoke checks passed. Detailed recaps were not provided. The optional
+  reboot test and the access-revocation scenario have not been reported; keep
+  the runtime acceptance checklist open pending the access scenario and final
+  result summary.
 
 ## Local commit map
 
