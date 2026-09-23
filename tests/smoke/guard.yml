@@ -15,3 +15,5 @@
 
 - name: Gather disposable guest facts after target confirmation
   ansible.builtin.setup:
+    gather_subset:
+      - '!mounts'

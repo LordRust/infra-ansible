@@ -23,6 +23,8 @@
   pre_tasks:
     - name: Check disposable target
       ansible.builtin.import_tasks: guard.yml
+    - name: Check disposable export before NFS verification
+      ansible.builtin.import_tasks: export-ready.yml
   tasks:
     - name: Trigger the NFS automount before inspecting it
       ansible.builtin.command:

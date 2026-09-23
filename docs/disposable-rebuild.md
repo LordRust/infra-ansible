@@ -129,10 +129,24 @@ sudo exportfs -v
 ```
 
 Expected: `/srv/smoke-data` is not exported while unmounted (an exportfs diagnostic
-is acceptable). Inspect the export list, not just the exit status. Restore the
-server with `sudo mount /srv/smoke-data` and `sudo exportfs -ra`, then rerun normal
-provisioning and data verification. Never use `exportfs -ua` on a real file server
-for this exercise. The test does not automatically unmount or stop anything.
+is acceptable). Inspect the export list, not just the exit status. **Do not run
+`data.yml` or `verify.yml` while the server disk is unmounted:** the client uses
+a hard NFS mount, so file operations may wait indefinitely for the export.
+
+Restore the server on **smoke-fs-01** before accessing `/smoke-fs` again:
+
+```bash
+sudo mount /srv/smoke-data
+mountpoint /srv/smoke-data
+sudo exportfs -ra
+sudo exportfs -v
+```
+
+Confirm the mount and export are present, then rerun normal provisioning and
+data verification. If a client playbook is already waiting on NFS, restoring
+the export may allow it to finish; interrupt it from the controller if needed.
+Never use `exportfs -ua` on a real file server for this exercise. The test does
+not automatically unmount or stop anything.
 
 ## 5. Access revocation
 

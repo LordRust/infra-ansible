@@ -10,6 +10,8 @@
       ansible.builtin.assert:
         that: not ansible_check_mode
         fail_msg: "Run after provisioning; this scenario writes only the disposable NFS marker."
+    - name: Check disposable export before NFS data operations
+      ansible.builtin.import_tasks: export-ready.yml
   tasks:
     - name: Write marker as the unprivileged NFS identity without replacing existing data
       ansible.builtin.command:

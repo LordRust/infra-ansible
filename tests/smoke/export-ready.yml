@@ -1,0 +1,27 @@
+---
+- name: Check disposable export backing mount before client NFS access
+  ansible.builtin.command:
+    argv: [mountpoint, --quiet, /srv/smoke-data]
+  delegate_to: smoke-fs-01
+  register: smoke_export_mount
+  changed_when: false
+  failed_when: false
+  check_mode: false
+
+- name: Check disposable NFS export before client NFS access
+  ansible.builtin.command:
+    argv: [exportfs, -v]
+  delegate_to: smoke-fs-01
+  register: smoke_export_list
+  changed_when: false
+  check_mode: false
+
+- name: Require the disposable export to be ready before client NFS access
+  ansible.builtin.assert:
+    that:
+      - smoke_export_mount.rc == 0
+      - "'/srv/smoke-data' in smoke_export_list.stdout"
+    fail_msg: >-
+      Restore /srv/smoke-data on smoke-fs-01 and run exportfs -ra before
+      accessing /smoke-fs on the client. A hard NFS mount can wait indefinitely
+      while its server export is unavailable.

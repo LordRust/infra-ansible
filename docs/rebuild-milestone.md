@@ -83,9 +83,16 @@ has passed. Record actual validation below; do not infer it from this checklist.
   provisioning check-mode run stopped at the CRAN key download: the keyserver
   returned 405 to `get_url`'s HEAD request. The R role now skips that download
   in check mode and continues to inspect and verify the key already on disk.
-  A successful check-mode rerun, reboot persistence, and the negative
-  storage/export checks in `docs/disposable-rebuild.md` have not been reported
-  yet, so the full runtime acceptance checklist remains open.
+  At that point, a successful check-mode rerun, reboot persistence, and the
+  negative storage/export checks in `docs/disposable-rebuild.md` had not been
+  reported.
+- Controller report: the final provisioning check-mode run passed. During the
+  negative export test, `data.yml` was run while the server backing filesystem
+  remained unmounted; client NFS access then waited on the unavailable hard
+  mount. The runbook now separates export inspection from restored-state data
+  verification, and the client smoke playbooks check the server mount/export
+  before touching NFS. Reboot persistence and remaining negative checks are
+  not yet recorded.
 
 ## Local commit map
 
