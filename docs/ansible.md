@@ -211,8 +211,8 @@ sudo_users:
 ```
 
 Removing a user from the effective list removes that user's rule the next time
-the applicable playbook runs. An empty list leaves the managed sudoers file
-empty and grants no passwordless sudo through this mechanism.
+the applicable playbook runs. An empty list leaves only a managed-file comment
+and grants no passwordless sudo through this mechanism.
 
 ## Base role
 

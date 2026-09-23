@@ -61,6 +61,10 @@ has passed. Record actual validation below; do not infer it from this checklist.
   alias returned `Permission denied (publickey,password)`. No guest was created,
   configured, stopped, or destroyed. Run `docs/disposable-rebuild.md` from a
   controller with access and record the actual guest/template IDs and recaps here.
+- Follow-up: the first disposable server run exposed empty `sudo_users` rendering
+  as an invalid `copy` task. The base role now renders a comment-only sudoers
+  file in that case. A local regression test checks empty and populated lists
+  with `visudo`; the full fixture validation suite passed with 11 tests.
 
 ## Local commit map
 

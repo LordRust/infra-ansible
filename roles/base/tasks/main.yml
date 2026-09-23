@@ -59,6 +59,7 @@
   ansible.builtin.copy:
     dest: /etc/sudoers.d/ansible-sudo-users
     content: |
+      # Managed by Ansible. Passwordless sudo users follow.
       {% for user in sudo_users %}
       {{ user }} ALL=(ALL:ALL) NOPASSWD: ALL
       {% endfor %}
