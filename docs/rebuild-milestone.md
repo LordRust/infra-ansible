@@ -12,7 +12,7 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 4. Configure file servers before development clients.
 - [x] 5. Strengthen filesystem and NFS validation.
 - [x] 6. Support explicit access revocation while keeping additions additive.
-- [ ] 7. Add Proxmox provisioning preflight checks and recovery guidance.
+- [x] 7. Add Proxmox provisioning preflight checks and recovery guidance.
 - [ ] 8. Add disposable guest smoke tests and record evidence.
 
 A checked commit means its implementation is present, not that live acceptance
@@ -48,3 +48,8 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
 - Commit 6: syntax and lint passed. Seven local policy cases exercised the
   actual assertions, including same-key/different-comment conflicts and Docker
   grant/revoke overlap. Actual guest membership/key removal remains pending.
+
+- Commit 7: shell syntax, ShellCheck, Python compilation, and six local
+  preflight tests passed (multiple malformed-input/collision cases). No Proxmox
+  mutation was attempted. Read-only SSH to `pgm2` failed authentication, so actual
+  Proxmox CLI responses and guest creation have not been runtime-validated.
