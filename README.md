@@ -47,13 +47,15 @@ Guests should be treated as reproducible and replaceable. Persistent configurati
 
 ## Deployment and validation
 
-Run `scripts/check.sh --ask-vault-pass` for local validation. After bootstrap
-and SSH host-key enrollment, use
+On a controller without lint tools, validate the real inventory and playbook
+syntax as described in [Ansible](docs/ansible.md). `scripts/check.sh` adds lint
+and local tests when those tools are installed. After bootstrap and SSH host-key
+enrollment, use
 `scripts/run_all_ansible.sh -i inventory.ini --ask-vault-pass` on the controller.
 Proxmox provisioning helpers remain in `proxmox_scripts/`; they belong to this
 same environment but run on the hypervisor. See [Ansible](docs/ansible.md) and
 [rebuild milestone](docs/rebuild-milestone.md).
 
-Without Vault credentials, `scripts/check.sh --fixtures-only` runs the secret-free
-local checks. Runtime acceptance is described in the
+With lint tools but without Vault credentials, `scripts/check.sh --fixtures-only`
+runs the secret-free local checks. Runtime acceptance is described in the
 [disposable Proxmox rebuild exercise](docs/disposable-rebuild.md).

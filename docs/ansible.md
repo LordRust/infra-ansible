@@ -282,26 +282,38 @@ git push
 
 Chat/Codex may propose changes, but changes should be reviewed before they are committed.
 
-## Local validation tools
+## Validation tools
 
-On Debian 13 install `ansible-core ansible-lint yamllint shellcheck` with APT,
-then run `ansible-galaxy collection install -r requirements.yml`. Checks never
-install dependencies automatically. Tested baseline: ansible-core 2.19.11,
-ansible-lint 25.6.1+really25.2.1, yamllint 1.37.1, ShellCheck 0.10.0,
-ansible.posix 2.2.0, community.general 11.2.1. Collection versions are pinned;
-APT tools may receive distribution fixes.
+The controller needs Ansible and the collections from `requirements.yml`; it
+does not need `ansible-lint`, `yamllint`, or ShellCheck to deploy. Before a real
+run, validate the Vault-backed inventory and playbook syntax from the repository
+root without printing resolved inventory variables:
 
-Run from any directory:
+```bash
+ansible-inventory -i inventory.ini --ask-vault-pass --list >/dev/null
+ansible-playbook -i inventory.ini site.yml --ask-vault-pass --syntax-check
+```
+
+For full local validation, install `ansible-core ansible-lint yamllint shellcheck`
+on a Debian 13 workstation or controller, then install the collections with
+`ansible-galaxy collection install -r requirements.yml`. Checks never install
+dependencies automatically. Tested baseline: ansible-core 2.19.11, ansible-lint
+25.6.1+really25.2.1, yamllint 1.37.1, ShellCheck 0.10.0, ansible.posix 2.2.0,
+community.general 11.2.1. Collection versions are pinned; APT tools may
+receive distribution fixes.
+
+Run the full local check from any directory:
 
 ```bash
 /path/to/infra-ansible/scripts/check.sh --ask-vault-pass
 # Or: scripts/check.sh --vault-id default@/absolute/path/outside/repo
 ```
 
-This parses inventory variables without printing them, checks every top-level
-playbook's syntax, runs YAML/Ansible lint (basic profile, offline), and checks
-shell scripts. Inventory loading requires the development group's Vault password
-even while SMB is disabled. Use only credential options as script arguments.
+`check.sh` requires all three lint tools. It parses inventory variables without
+printing them, checks every top-level playbook's syntax, runs YAML/Ansible lint
+(basic profile, offline), and checks shell scripts. Inventory loading requires
+the development group's Vault password even while SMB is disabled. Use only
+credential options as script arguments.
 Do not commit passwords or decrypted inventory output. Syntax/lint checks do not
 contact guests; `ansible-playbook --check` does and is a separate validation step.
 
