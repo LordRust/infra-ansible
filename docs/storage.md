@@ -130,7 +130,7 @@ qm disk resize 401 scsi1 +500G
 Then rerun the appropriate guest playbook:
 
 ```bash
-ansible-playbook -i inventory.ini dev-base.yml --limit dev01
+ansible-playbook -i inventory.ini dev-base.yml --ask-vault-pass --limit dev01
 ansible-playbook -i inventory.ini fs-base.yml --limit infra-fs-01
 ```
 

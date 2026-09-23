@@ -21,7 +21,7 @@ nfs_mounts:
     src: rs-fs2.lunarc.lu.se:/disk
 
   - path: /fs3
-    src: infra-fs-01:/srv/fs3
+    src: "{{ hostvars['infra-fs-01'].ansible_host }}:/srv/fs3"
     opts: rw,_netdev,x-systemd.automount,nofail
 ```
 

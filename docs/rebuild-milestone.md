@@ -9,7 +9,7 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 1. Streamline agent guidance and record this milestone.
 - [x] 2. Add repeatable local validation and tested dependency versions.
 - [x] 3. Make development package provisioning self-contained.
-- [ ] 4. Configure file servers before development clients.
+- [x] 4. Configure file servers before development clients.
 - [ ] 5. Strengthen filesystem and NFS validation.
 - [ ] 6. Support explicit access revocation while keeping additions additive.
 - [ ] 7. Add Proxmox provisioning preflight checks and recovery guidance.
@@ -35,3 +35,7 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
 
 - Commit 3: development syntax check, YAML lint, and basic Ansible lint passed.
   Clean-template installation remains a disposable-guest acceptance check.
+
+- Commit 4: site syntax, YAML and shell checks passed. Stubbed wrapper tests
+  verified working-directory independence, argument forwarding, and refusal
+  without an explicit inventory. NFS runtime validation is still pending.

@@ -36,7 +36,7 @@ ansible-playbook -i inventory.ini admin-local.yml
 Normal execution:
 
 ```bash
-ansible-playbook -i inventory.ini dev-base.yml
+ansible-playbook -i inventory.ini dev-base.yml --ask-vault-pass
 ansible-playbook -i inventory.ini db-base.yml
 ansible-playbook -i inventory.ini fs-base.yml
 ```
@@ -46,7 +46,7 @@ Useful checks:
 ```bash
 ansible-inventory -i inventory.ini --graph
 ansible-playbook -i inventory.ini dev-base.yml --syntax-check
-ansible-playbook -i inventory.ini dev-base.yml --check
+ansible-playbook -i inventory.ini dev-base.yml --ask-vault-pass --check
 ```
 
 Re-running playbooks after changes is normal. Tasks should be idempotent: already-correct state should report `ok` rather than continually changing the host.
@@ -311,3 +311,25 @@ Docker and Apptainer deliberately support Debian 13 amd64 only and assert this
 before package changes. Docker installs its own `python3-debian` repository
 prerequisite. Routine package-cache refreshes allow a one-hour cache age;
 repository changes still force a refresh. This does not change application pins.
+
+## Whole-environment deployment
+
+Run on an Ansible controller, after explicit SSH host-key enrollment:
+
+```bash
+ansible-playbook -i inventory.ini admin-local.yml
+scripts/run_all_ansible.sh -i inventory.ini --ask-vault-pass
+```
+
+`site.yml` configures administration hosts, file servers, databases, then
+clients. Individual playbooks remain available. The wrapper works from any
+working directory; relative inventory paths are relative to the repository.
+An explicit inventory is required so a smoke inventory cannot accidentally be
+combined with the real one. All supplied options are forwarded to Ansible.
+Host-key enrollment is not repeated during normal deployment; independently
+verify fingerprints when accepting new or rebuilt machines.
+
+The `/fs3` client source uses the file server's `ansible_host` inventory address,
+so a fresh VM does not depend on an unmanaged short DNS name. This assumes
+`ansible_host` is reachable from the guests, as it is on this private network.
+A `--limit` excluding the file server requires that server to be configured already.

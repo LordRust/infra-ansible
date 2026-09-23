@@ -41,3 +41,8 @@ The LXC script creates an unprivileged Debian 13 container with 2 cores, 2 GiB R
 LXC does not use the QEMU cloud-init `--ciuser`/`--sshkey` path. The script therefore creates the `ansible` account directly with `pct`, installs its public key, and grants passwordless sudo for automation.
 
 Proxmox IDs are shared between QEMU VMs and LXC containers. An ID must be free before creating either guest type.
+
+## Controller-side deployment
+
+The former `run_all_ansible.sh` helper has moved to `scripts/`. Run it on the
+Ansible controller, not the Proxmox host; see [Ansible](../docs/ansible.md).

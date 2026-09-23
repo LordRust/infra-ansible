@@ -1,0 +1,12 @@
+---
+- name: Configure administration hosts
+  ansible.builtin.import_playbook: admin-base.yml
+
+- name: Configure file servers before their clients
+  ansible.builtin.import_playbook: fs-base.yml
+
+- name: Configure database hosts
+  ansible.builtin.import_playbook: db-base.yml
+
+- name: Configure development hosts
+  ansible.builtin.import_playbook: dev-base.yml

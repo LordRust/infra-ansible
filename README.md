@@ -44,3 +44,12 @@ application-specific tooling
 ```
 
 Guests should be treated as reproducible and replaceable. Persistent configuration belongs in this repository rather than being maintained manually inside individual guests.
+
+## Deployment and validation
+
+Run `scripts/check.sh --ask-vault-pass` for local validation. After bootstrap
+and SSH host-key enrollment, use
+`scripts/run_all_ansible.sh -i inventory.ini --ask-vault-pass` on the controller.
+Proxmox provisioning helpers remain in `proxmox_scripts/`; they belong to this
+same environment but run on the hypervisor. See [Ansible](docs/ansible.md) and
+[rebuild milestone](docs/rebuild-milestone.md).
