@@ -25,10 +25,10 @@
       ansible.builtin.import_tasks: guard.yml
   tasks:
     - name: Trigger the NFS automount before inspecting it
-      become: true
-      become_user: smoke-user
-      ansible.builtin.stat:
-        path: /smoke-fs/.
+      ansible.builtin.command:
+        argv: [runuser, -u, smoke-user, --, stat, --, /smoke-fs/.]
+      changed_when: false
+      check_mode: false
 
     - name: Verify NFS source
       ansible.builtin.command:

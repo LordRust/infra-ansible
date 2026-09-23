@@ -73,9 +73,10 @@ has passed. Record actual validation below; do not infer it from this checklist.
   passed with the updated collection; a live rerun is still needed.
 - Follow-up: live smoke verification reached the NFS automount but could not
   stat its mode-2770 export as client root, which is root-squashed by the server.
-  Verification and marker file operations now run as `smoke-user`. The data
-  task's existence check also runs as that user, preserving an existing marker
-  on rerun. Live verification and data checks remain pending.
+  A first fix using Ansible `become_user` failed on the guest while preparing
+  temporary module permissions. Verification and marker file operations now
+  invoke `runuser` from root-run modules so the NFS access and marker existence
+  check both run as `smoke-user`. Live verification and data checks remain pending.
 
 ## Local commit map
 
