@@ -37,8 +37,8 @@ Example role:
   ansible.posix.mount:
     path: "{{ item.path }}"
     src: "{{ item.src }}"
-    fstype: "{{ item.fstype | default('nfs4') }}"
-    opts: "{{ item.opts | default('vers=4.0') }}"
+    fstype: nfs
+    opts: "{{ item.opts | default('ro,_netdev,x-systemd.automount,nofail') }}"
     state: mounted
   loop: "{{ nfs_mounts }}"
 ```
@@ -99,6 +99,11 @@ and `/fs2` retain the client role's read-only default unless they have an
 explicit `opts` override.
 
 ## SMB/CIFS
+
+Status: incomplete and disabled in `dev-base.yml`. The current role contains only
+the mount task; it does not yet install `cifs-utils` or render root-only credential
+files. The remaining sections describe the intended implementation, not a working
+clean-guest setup. Do not enable it without completing those prerequisites.
 
 Use a separate `smb-client` role.
 

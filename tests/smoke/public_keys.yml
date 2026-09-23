@@ -1,0 +1,8 @@
+---
+# Public fixture keys only; private halves were discarded.
+smoke_key_keep: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDw8cFMthP9vbS9Fzc63XbdUEoI3/55A2Jf83kbxokCa
+  disposable-smoke-keep
+smoke_key_revoke: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIGvv8L/dh0eiHRQVqH/78RxzewGbd0zrxaVL7+3IBbSI
+  disposable-smoke-revoke
+smoke_key_unmanaged: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIA4qFladXHoNrgwKptdHlqZYgRGF5dQwfrByDD5R/UVj
+  disposable-smoke-unmanaged

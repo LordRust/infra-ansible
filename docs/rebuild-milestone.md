@@ -13,7 +13,8 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 5. Strengthen filesystem and NFS validation.
 - [x] 6. Support explicit access revocation while keeping additions additive.
 - [x] 7. Add Proxmox provisioning preflight checks and recovery guidance.
-- [ ] 8. Add disposable guest smoke tests and record evidence.
+- [x] 8. Add disposable guest smoke tests and record available evidence.
+- [ ] Runtime acceptance on two disposable Proxmox guests.
 
 A checked commit means its implementation is present, not that live acceptance
 has passed. Record actual validation below; do not infer it from this checklist.
@@ -22,11 +23,6 @@ has passed. Record actual validation below; do not infer it from this checklist.
 
 - Initial review: all three existing shell scripts passed bash syntax and ShellCheck.
 - Commit 1: documentation reviewed against the current implementation; no live changes.
-
-## Deferred
-
-SMB completion, backup automation, production hardening, dedicated MongoDB/LXC
-runtime tests, and migration tooling for the larger QEMU/KVM environment.
 
 - Commit 2: all five playbook syntax checks, YAML lint, basic Ansible lint,
   bash syntax, and ShellCheck passed. Six narrowly scoped lint exceptions retain
@@ -53,3 +49,33 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
   preflight tests passed (multiple malformed-input/collision cases). No Proxmox
   mutation was attempted. Read-only SSH to `pgm2` failed authentication, so actual
   Proxmox CLI responses and guest creation have not been runtime-validated.
+
+- Commit 8: `scripts/check.sh --fixtures-only` passed with ansible-core 2.19.11,
+  pinned collections, YAML lint, basic Ansible lint (six documented naming
+  exceptions), shell checks, all ten local tests, and syntax checks for all
+  top-level and four smoke playbooks. The smoke refusal test exercised all four
+  playbooks with an SSH sentinel and confirmed no connection before confirmation.
+- Real inventory variable loading remains unvalidated: the development Vault
+  password source was not available. The full check reports this explicitly.
+- Live acceptance remains unperformed: root SSH through the configured `pgm2`
+  alias returned `Permission denied (publickey,password)`. No guest was created,
+  configured, stopped, or destroyed. Run `docs/disposable-rebuild.md` from a
+  controller with access and record the actual guest/template IDs and recaps here.
+
+## Local commit map
+
+| Step | Commit | Subject |
+|---|---|---|
+| 1 | `24a52f5` | Streamline agent guidance and record rebuild milestone |
+| 2 | `ad419e3` | Add repeatable local validation |
+| 3 | `69cd83b` | Make development package provisioning self-contained |
+| 4 | `9969b3e` | Configure file servers before development clients |
+| 5 | `9e297eb` | Strengthen filesystem and NFS validation |
+| 6 | `3c48d38` | Support explicit access revocation |
+| 7 | `b51c383` | Add Proxmox provisioning preflight checks |
+| 8 | This document's smoke-test commit | Document and verify disposable guest rebuilds |
+
+## Deferred
+
+SMB completion, backup automation, production hardening, dedicated MongoDB/LXC
+runtime tests, and migration tooling for the larger QEMU/KVM environment.

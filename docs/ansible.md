@@ -370,3 +370,15 @@ hold group privileges. Users must end old sessions; administrators must separate
 handle active sessions when immediate revocation is required. Removing a human
 from `managed_users` does not remove their account, keys, files, or sudo rules.
 Account retirement remains an explicit operator procedure; review all four.
+
+## Secret-free smoke checks
+
+`scripts/check.sh --fixtures-only` validates the example smoke inventory, all
+playbook syntax, lint, shell scripts, and local regression tests without Vault
+credentials or guest connections. It explicitly does **not** validate real
+inventory variables. Use the normal mode with Vault credentials for that check.
+
+Follow [the disposable rebuild exercise](disposable-rebuild.md) for real runtime
+acceptance. Its separate groups avoid external shares and real development Vault
+variables. It uses the actual roles, with a small duplicate of their ordering;
+keep the smoke role list aligned when the normal playbooks change.

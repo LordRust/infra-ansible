@@ -1,0 +1,97 @@
+---
+- name: Exercise access revocation on a disposable development guest
+  hosts: smoke_devhosts
+  gather_facts: false
+  become: true
+  vars_files:
+    - public_keys.yml
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+    - name: Require real execution for the access scenario
+      ansible.builtin.assert:
+        that: not ansible_check_mode
+        fail_msg: "Run after provisioning; this scenario intentionally grants then revokes fixture access."
+  tasks:
+    - name: Record bootstrap key checksum
+      ansible.builtin.stat:
+        path: /home/ansible/.ssh/authorized_keys
+        checksum_algorithm: sha256
+      register: smoke_bootstrap_before
+
+    - name: Create unrelated supplementary group
+      ansible.builtin.group:
+        name: smoke-extra
+        state: present
+
+    - name: Install initial fixture grants through base role # noqa var-naming[no-role-prefix]
+      ansible.builtin.include_role:
+        name: base
+      vars:
+        managed_users:
+          - name: smoke-user
+            uid: 25001
+            primary_group: smoke-users
+            primary_gid: 25001
+            groups: [smoke-extra]
+            ssh_keys: ["{{ smoke_key_keep }}", "{{ smoke_key_revoke }}"]
+
+    - name: Add an unmanaged fixture key
+      ansible.posix.authorized_key:
+        user: smoke-user
+        key: "{{ smoke_key_unmanaged }}"
+        state: present
+
+    - name: Grant Docker membership through Docker role
+      ansible.builtin.include_role:
+        name: docker
+      vars:
+        docker_users: [smoke-user]
+        docker_revoked_users: []
+
+    - name: Revoke one key through base role # noqa var-naming[no-role-prefix]
+      ansible.builtin.include_role:
+        name: base
+      vars:
+        managed_users:
+          - name: smoke-user
+            uid: 25001
+            primary_group: smoke-users
+            primary_gid: 25001
+            groups: [smoke-extra]
+            ssh_keys: ["{{ smoke_key_keep }}"]
+            revoked_ssh_keys: ["{{ smoke_key_revoke }}"]
+
+    - name: Revoke Docker membership through Docker role
+      ansible.builtin.include_role:
+        name: docker
+      vars:
+        docker_users: []
+        docker_revoked_users: [smoke-user]
+
+    - name: Read resulting fixture keys
+      ansible.builtin.slurp:
+        src: /home/smoke-user/.ssh/authorized_keys
+      register: smoke_keys_after
+
+    - name: Read resulting fixture memberships
+      ansible.builtin.command:
+        argv: [id, -nG, smoke-user]
+      register: smoke_groups_after
+      changed_when: false
+
+    - name: Read bootstrap key checksum after revocation
+      ansible.builtin.stat:
+        path: /home/ansible/.ssh/authorized_keys
+        checksum_algorithm: sha256
+      register: smoke_bootstrap_after
+
+    - name: Verify selective revocation and preserved bootstrap access
+      ansible.builtin.assert:
+        that:
+          - smoke_key_keep.split()[1] in (smoke_keys_after.content | b64decode)
+          - smoke_key_unmanaged.split()[1] in (smoke_keys_after.content | b64decode)
+          - smoke_key_revoke.split()[1] not in (smoke_keys_after.content | b64decode)
+          - "'docker' not in smoke_groups_after.stdout.split()"
+          - "'smoke-extra' in smoke_groups_after.stdout.split()"
+          - smoke_bootstrap_before.stat.checksum == smoke_bootstrap_after.stat.checksum

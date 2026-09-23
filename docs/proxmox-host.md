@@ -63,14 +63,21 @@ iptables -S FORWARD
 
 `bridge link` lists bridge ports, not bridge devices. A bridge with `bridge-ports none` may therefore not appear in `bridge link`.
 
-Check for old CPU, mongo does really want Haskell and later with AVX2
-On the host
-```
-lscpu | grep 'Model name'
-grep -m1 '^flags' /proc/cpuinfo | tr ' ' '\n' | grep -E '^avx2?$'
+## Guest CPU capabilities
 
-And the db VM
+Check the selected MongoDB release's CPU requirements against the physical host
+and guest. CPU passthrough (`--cpu host` in the creation helper) exposes available
+host instructions; it cannot add instructions absent from the hardware.
+
+On the Proxmox host and again inside the database guest:
+
+```bash
+lscpu
 ```
+
+Inside the database guest, also check service startup:
+
+```bash
 systemctl status mongod --no-pager
 mongosh
 ```

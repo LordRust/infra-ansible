@@ -1,0 +1,32 @@
+---
+# Set ANSIBLE_ROLES_PATH to the repository's roles directory on the controller.
+# Separate groups deliberately avoid loading the real devhosts Vault and mounts.
+- name: Configure disposable file server
+  hosts: smoke_fileservers
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+  roles:
+    - base
+    - local-filesystem
+    - nfs-server
+
+- name: Configure disposable development client after its server
+  hosts: smoke_devhosts
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+  roles:
+    - base
+    - local-filesystem
+    - nfs-client
+    - docker
+    - apptainer
+    - role: r
+      when: r_enabled | default(false)
+    - role: rstudio-server
+      when: rstudio_server_enabled | default(false)

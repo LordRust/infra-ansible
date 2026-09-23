@@ -3,3 +3,4 @@ patch/
 .cache/
 *.retry
 __pycache__/
+tests/smoke/inventory.yml

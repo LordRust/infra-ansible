@@ -1,0 +1,57 @@
+---
+# Copy to inventory.yml; verify both VMIDs and addresses before setting confirmed.
+all:
+  vars:
+    smoke_confirmed: false
+    ansible_user: ansible
+    ansible_python_interpreter: /usr/bin/python3
+    managed_groups:
+      - name: smoke-users
+        gid: 25001
+    managed_users:
+      - name: smoke-user
+        uid: 25001
+        primary_group: smoke-users
+        primary_gid: 25001
+        ssh_keys: []
+    sudo_users: []
+  children:
+    smoke_fileservers:
+      hosts:
+        smoke-fs-01:
+          ansible_host: 10.10.10.201
+          smoke_vmid: 901
+          local_filesystems:
+            - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+              label: smoke-fs
+              path: /srv/smoke-data
+              fstype: ext4
+              owner: smoke-user
+              group: smoke-users
+              mode: '2770'
+          nfs_exports:
+            - path: /srv/smoke-data
+              clients: "{{ hostvars['smoke-dev-01'].ansible_host }}/32"
+              options: rw,sync,no_subtree_check
+    smoke_devhosts:
+      hosts:
+        smoke-dev-01:
+          ansible_host: 10.10.10.202
+          smoke_vmid: 902
+          local_filesystems:
+            - device: /dev/disk/by-id/scsi-0QEMU_QEMU_HARDDISK_drive-scsi1
+              label: smoke-local
+              path: /local
+              fstype: ext4
+              owner: smoke-user
+              group: smoke-users
+              mode: '2770'
+          nfs_mounts:
+            - path: /smoke-fs
+              src: "{{ hostvars['smoke-fs-01'].ansible_host }}:/srv/smoke-data"
+              opts: rw,_netdev,x-systemd.automount,nofail
+          docker_users:
+            - smoke-user
+          apptainer_version: '1.5.3'
+          r_enabled: true
+          rstudio_server_enabled: true

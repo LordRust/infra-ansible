@@ -1,0 +1,17 @@
+---
+- name: Require explicit disposable-target confirmation before connecting
+  ansible.builtin.assert:
+    that:
+      - smoke_confirmed | default(false) | bool
+      - inventory_hostname in ['smoke-fs-01', 'smoke-dev-01']
+      - ansible_host is match('^10\.10\.10\.[0-9]+$')
+      - smoke_vmid | int >= 900
+      - smoke_vmid | int <= 999
+    fail_msg: >-
+      Copy inventory.example.yml, verify free IDs/addresses and disposable disks,
+      and set smoke_confirmed to true. Never point this fixture at real guests.
+  delegate_to: localhost
+  become: false
+
+- name: Gather disposable guest facts after target confirmation
+  ansible.builtin.setup:

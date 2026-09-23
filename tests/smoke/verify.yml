@@ -1,0 +1,58 @@
+---
+- name: Verify disposable guest mounts
+  hosts: smoke_fileservers:smoke_devhosts
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+  tasks:
+    - name: Verify local disk mount sources
+      ansible.builtin.command:
+        argv: [findmnt, --noheadings, --output, LABEL, --mountpoint, "{{ item.path }}"]
+      loop: "{{ local_filesystems }}"
+      register: smoke_mount
+      changed_when: false
+      failed_when: smoke_mount.rc != 0 or smoke_mount.stdout | trim != item.label
+      check_mode: false
+
+- name: Verify disposable development services
+  hosts: smoke_devhosts
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+  tasks:
+    - name: Trigger the NFS automount before inspecting it
+      ansible.builtin.stat:
+        path: /smoke-fs/.
+
+    - name: Verify NFS source
+      ansible.builtin.command:
+        argv: [findmnt, --types, 'nfs,nfs4', --noheadings, --output, SOURCE, --mountpoint, /smoke-fs]
+      register: smoke_nfs
+      changed_when: false
+      failed_when: >-
+        smoke_nfs.rc != 0 or smoke_nfs.stdout | trim !=
+        hostvars['smoke-fs-01'].ansible_host ~ ':/srv/smoke-data'
+      check_mode: false
+
+    - name: Verify installed development commands
+      ansible.builtin.command:
+        argv: "{{ item }}"
+      loop:
+        - [docker, --version]
+        - [apptainer, --version]
+        - [R, --version]
+        - [systemctl, is-active, docker]
+        - [systemctl, is-active, rstudio-server]
+      changed_when: false
+      check_mode: false
+
+    - name: Verify loopback RStudio listener
+      ansible.builtin.wait_for:
+        host: 127.0.0.1
+        port: 8787
+        timeout: 15
+      check_mode: false

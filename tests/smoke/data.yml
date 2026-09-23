@@ -1,0 +1,35 @@
+---
+- name: Exercise NFS writes and preserve an existing data marker
+  hosts: smoke_devhosts
+  gather_facts: false
+  become: true
+  pre_tasks:
+    - name: Check disposable target
+      ansible.builtin.import_tasks: guard.yml
+    - name: Require real execution for the data scenario
+      ansible.builtin.assert:
+        that: not ansible_check_mode
+        fail_msg: "Run after provisioning; this scenario writes only the disposable NFS marker."
+  tasks:
+    - name: Write marker as the unprivileged NFS identity without replacing existing data
+      ansible.builtin.command:
+        argv:
+          - runuser
+          - -u
+          - smoke-user
+          - --
+          - sh
+          - -c
+          - 'printf "%s\n" "infra-ansible smoke data survives" > /smoke-fs/rebuild-marker'
+        creates: /smoke-fs/rebuild-marker
+      register: smoke_marker_write
+      changed_when: smoke_marker_write is changed
+
+    - name: Read the preserved marker
+      ansible.builtin.slurp:
+        src: /smoke-fs/rebuild-marker
+      register: smoke_marker
+
+    - name: Verify data survived and NFS identity can write
+      ansible.builtin.assert:
+        that: (smoke_marker.content | b64decode | trim) == 'infra-ansible smoke data survives'
