@@ -14,7 +14,7 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 6. Support explicit access revocation while keeping additions additive.
 - [x] 7. Add Proxmox provisioning preflight checks and recovery guidance.
 - [x] 8. Add disposable guest smoke tests and record available evidence.
-- [ ] Runtime acceptance on two disposable Proxmox guests.
+- [x] Runtime acceptance on two disposable Proxmox guests (controller-reported).
 
 A checked commit means its implementation is present, not that live acceptance
 has passed. Record actual validation below; do not infer it from this checklist.
@@ -95,9 +95,16 @@ has passed. Record actual validation below; do not infer it from this checklist.
   not yet recorded.
 - Controller report after commit `9300461`: the export was restored and the
   resumed smoke checks passed. Detailed recaps were not provided. The optional
-  reboot test and the access-revocation scenario have not been reported; keep
-  the runtime acceptance checklist open pending the access scenario and final
-  result summary.
+  reboot test and the access-revocation scenario had not yet been reported, so
+  the runtime acceptance checklist remained open at that point.
+- Final controller report: the access-revocation scenario passed. The reported
+  disposable-guest runs now cover provisioning, verification, data preservation,
+  an immediate rerun, check mode, negative storage/export checks, and access
+  revocation. Runtime acceptance is complete on that reported evidence; detailed
+  recaps and the optional reboot-persistence check were not supplied. The
+  access scenario deliberately revoked Docker membership and a fixture SSH key;
+  normal provisioning restores Docker membership from the smoke inventory if
+  the guests are kept.
 
 ## Local commit map
 
