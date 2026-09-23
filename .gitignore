@@ -2,3 +2,4 @@ patch/
 .ansible/
 .cache/
 *.retry
+__pycache__/

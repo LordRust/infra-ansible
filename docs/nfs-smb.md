@@ -167,3 +167,7 @@ credentials=/etc/samba/credentials/labshare
 ```
 
 Do not place plaintext passwords in `/etc/fstab`, `smb_mounts.yml`, or unencrypted Git content.
+
+The server role always adds `mountpoint` to generated export options. Export
+processing therefore refuses the directory if its backing filesystem is missing,
+including outside an Ansible run. This complements the role's pre-export check.

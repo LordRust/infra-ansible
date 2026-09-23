@@ -28,4 +28,5 @@ while IFS= read -r -d '' script; do
     bash -n "$script"
     shellcheck "$script"
 done < <(find scripts proxmox_scripts -type f -name '*.sh' -print0)
+python3 -m unittest discover -s tests/local -v
 echo 'Local validation passed; no managed hosts were contacted.'

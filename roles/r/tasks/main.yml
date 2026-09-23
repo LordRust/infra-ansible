@@ -31,6 +31,23 @@
     group: root
     mode: "0644"
 
+- name: Inspect CRAN fingerprint prerequisites
+  ansible.builtin.stat:
+    path: "{{ item }}"
+  loop:
+    - /usr/bin/gpg
+    - "{{ r_cran_keyring }}"
+  register: r_cran_probe_files
+
+- name: Explain first-run fingerprint check limitation
+  ansible.builtin.debug:
+    msg: >-
+      Check mode has not installed GPG or downloaded the CRAN key. The real
+      run must verify its fingerprint before configuring the repository.
+  when:
+    - ansible_check_mode
+    - not (r_cran_probe_files.results | map(attribute='stat.exists') | min)
+
 - name: Read CRAN signing key fingerprint
   ansible.builtin.command:
     argv:
@@ -41,12 +58,15 @@
       - "{{ r_cran_keyring }}"
   register: r_cran_key_info
   changed_when: false
+  check_mode: false
+  when: not ansible_check_mode or (r_cran_probe_files.results | map(attribute='stat.exists') | min)
 
 - name: Verify CRAN signing key fingerprint
   ansible.builtin.assert:
     that:
       - r_cran_fingerprint in r_cran_key_info.stdout
     fail_msg: "Downloaded CRAN signing key has an unexpected fingerprint"
+  when: not ansible_check_mode or not (r_cran_key_info.skipped | default(false))
 
 - name: Configure CRAN repository
   ansible.builtin.copy:

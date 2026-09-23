@@ -10,7 +10,7 @@ Debian 13 file server and development VM, not existing data disks.
 - [x] 2. Add repeatable local validation and tested dependency versions.
 - [x] 3. Make development package provisioning self-contained.
 - [x] 4. Configure file servers before development clients.
-- [ ] 5. Strengthen filesystem and NFS validation.
+- [x] 5. Strengthen filesystem and NFS validation.
 - [ ] 6. Support explicit access revocation while keeping additions additive.
 - [ ] 7. Add Proxmox provisioning preflight checks and recovery guidance.
 - [ ] 8. Add disposable guest smoke tests and record evidence.
@@ -39,3 +39,8 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
 - Commit 4: site syntax, YAML and shell checks passed. Stubbed wrapper tests
   verified working-directory independence, argument forwarding, and refusal
   without an explicit inventory. NFS runtime validation is still pending.
+
+- Commit 5: site syntax and lint passed. The local assertion regression test
+  exercises existing/blank devices, wrong types/labels, absent labels, and probe
+  errors without device access. Real mounting, growth, and reboot/export behavior
+  remain pending on disposable guests.

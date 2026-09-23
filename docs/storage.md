@@ -106,7 +106,7 @@ the verified path, filesystem label, and mount point in that VM's `host_vars`
 file. The `local-filesystem` role can format a blank disk as ext4, assigns its
 label, adds the label-based `/etc/fstab` entry, and mounts it. It refuses to
 replace a filesystem of another type. An existing filesystem with the wrong
-label must be corrected manually and deliberately rather than being relabeled
+label is rejected before resizing and must be corrected manually and deliberately rather than being relabeled
 automatically.
 
 ## Growing a data disk

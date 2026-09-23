@@ -20,6 +20,22 @@
       - "{{ item.path }}"
   loop: "{{ nfs_exports }}"
   changed_when: false
+  check_mode: false
+  register: nfs_server_mountpoint
+  failed_when: >-
+    nfs_server_mountpoint.rc != 0 and not
+    (ansible_check_mode and nfs_server_mountpoint.rc in [1, 32] and
+     item.path in (local_filesystems | default([]) | map(attribute='path') | list))
+
+- name: Explain mounts that check mode cannot create
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.item.path }} would be mounted by local-filesystem. Check mode
+      cannot validate its future export; a real run must pass the mount guard.
+  loop: "{{ nfs_server_mountpoint.results }}"
+  when:
+    - ansible_check_mode
+    - item.rc != 0
 
 - name: Remove managed exports from the legacy exports file
   ansible.builtin.lineinfile:

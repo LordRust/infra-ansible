@@ -333,3 +333,21 @@ The `/fs3` client source uses the file server's `ansible_host` inventory address
 so a fresh VM does not depend on an unmanaged short DNS name. This assumes
 `ansible_host` is reachable from the guests, as it is on this private network.
 A `--limit` excluding the file server requires that server to be configured already.
+
+## Storage and check-mode guarantees
+
+Read-only `blkid`, `mountpoint`, and available CRAN fingerprint probes run even
+with `--check`. Existing filesystem types and labels are validated before any
+resize. Real runs verify labels after creation. Blank-device check runs report
+that future labels and mounts cannot yet be verified.
+
+The NFS guard only tolerates a missing mount in check mode when that exact path
+is configured in `local_filesystems`; a real run must find it mounted. Generated
+exports also include `mountpoint`, so export processing refuses an unmounted
+backing directory independently of the Ansible invocation.
+
+If GPG or the CRAN key is absent in check mode, fingerprint validation is deferred
+with an explanation. This does not waive validation on a real run. First-run
+check mode can still fail when packages/services depend on repositories or
+prerequisites that are only predicted, not installed. Run clean provisioning
+on disposable guests, then use check mode and immediate reruns for convergence.

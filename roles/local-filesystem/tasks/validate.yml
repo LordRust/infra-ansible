@@ -1,0 +1,29 @@
+---
+- name: Refuse to overwrite a different filesystem type
+  ansible.builtin.assert:
+    that:
+      - item.rc in [0, 2]
+      - item.rc == 2 or item.stdout == item.item.fstype
+    fail_msg: >-
+      Could not safely treat {{ item.item.device }} as blank or as
+      {{ item.item.fstype }} (blkid rc={{ item.rc }}, type=
+      {{ item.stdout | default('unknown') }}). The role will not reformat it.
+  loop: "{{ local_filesystem_types.results }}"
+  loop_control:
+    label: "{{ item.item.device }}"
+
+- name: Require existing labels before resizing or mounting
+  ansible.builtin.assert:
+    that:
+      - item.rc in [0, 2]
+      - >-
+        local_filesystem_types.results[local_filesystem_index].rc == 2 or
+        (item.rc == 0 and item.stdout == item.item.label)
+    fail_msg: >-
+      {{ item.item.device }} has label {{ item.stdout | default('none') }},
+      expected {{ item.item.label }}. Verify the disk identity and correct the
+      existing label explicitly before continuing. No resize has been attempted.
+  loop: "{{ local_filesystem_labels.results }}"
+  loop_control:
+    index_var: local_filesystem_index
+    label: "{{ item.item.device }}"

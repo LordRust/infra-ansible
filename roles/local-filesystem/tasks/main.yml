@@ -38,31 +38,9 @@
   register: local_filesystem_types
   changed_when: false
   failed_when: false
+  check_mode: false
 
-- name: Refuse to overwrite a different filesystem type
-  ansible.builtin.assert:
-    that:
-      - item.rc in [0, 2]
-      - item.rc == 2 or item.stdout == item.item.fstype
-    fail_msg: >-
-      Could not safely treat {{ item.item.device }} as blank or as
-      {{ item.item.fstype }} (blkid rc={{ item.rc }}, type=
-      {{ item.stdout | default('unknown') }}). The role will not reformat it.
-  loop: "{{ local_filesystem_types.results }}"
-  loop_control:
-    label: "{{ item.item.device }}"
-
-- name: Create or grow local filesystems
-  community.general.filesystem:
-    dev: "{{ item.device }}"
-    fstype: "{{ item.fstype }}"
-    opts: "-L {{ item.label }}"
-    resizefs: true
-    force: false
-    state: present
-  loop: "{{ local_filesystems }}"
-
-- name: Read filesystem labels
+- name: Read existing filesystem labels before any resize
   ansible.builtin.command:
     argv:
       - blkid
@@ -74,18 +52,48 @@
   loop: "{{ local_filesystems }}"
   register: local_filesystem_labels
   changed_when: false
+  failed_when: false
+  check_mode: false
 
-- name: Require the configured filesystem labels
-  ansible.builtin.assert:
-    that:
-      - item.stdout == item.item.label
-    fail_msg: >-
-      {{ item.item.device }} has label {{ item.stdout | default('none') }},
-      expected {{ item.item.label }}. Correct the existing label explicitly
-      before continuing.
-  loop: "{{ local_filesystem_labels.results }}"
-  loop_control:
-    label: "{{ item.item.device }}"
+- name: Validate existing filesystem identities before mutation
+  ansible.builtin.import_tasks: validate.yml
+
+- name: Explain blank filesystem predictions in check mode
+  ansible.builtin.debug:
+    msg: >-
+      {{ item.item.device }} is blank. Check mode predicts creation but cannot
+      verify the future label, mount, permissions, or filesystem growth.
+  loop: "{{ local_filesystem_types.results }}"
+  when:
+    - ansible_check_mode
+    - item.rc == 2
+
+- name: Create or grow local filesystems
+  community.general.filesystem:
+    dev: "{{ item.device }}"
+    fstype: "{{ item.fstype }}"
+    opts: "-L {{ item.label }}"
+    resizefs: true
+    force: false
+    state: present
+  loop: "{{ local_filesystems }}"
+
+- name: Verify labels after real filesystem creation
+  ansible.builtin.command:
+    argv:
+      - blkid
+      - -o
+      - value
+      - -s
+      - LABEL
+      - "{{ item.device }}"
+  loop: "{{ local_filesystems }}"
+  register: local_filesystem_created_labels
+  changed_when: false
+  failed_when: >-
+    local_filesystem_created_labels.rc != 0 or
+    local_filesystem_created_labels.stdout != item.label
+  when: not ansible_check_mode
 
 - name: Configure and mount local filesystems
   ansible.posix.mount:
