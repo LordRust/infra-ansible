@@ -304,3 +304,10 @@ shell scripts. Inventory loading requires the development group's Vault password
 even while SMB is disabled. Use only credential options as script arguments.
 Do not commit passwords or decrypted inventory output. Syntax/lint checks do not
 contact guests; `ansible-playbook --check` does and is a separate validation step.
+
+### Development package prerequisites
+
+Docker and Apptainer deliberately support Debian 13 amd64 only and assert this
+before package changes. Docker installs its own `python3-debian` repository
+prerequisite. Routine package-cache refreshes allow a one-hour cache age;
+repository changes still force a refresh. This does not change application pins.

@@ -1,3 +1,12 @@
+---
+- name: Verify supported development platform
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - ansible_distribution_major_version == "13"
+      - ansible_architecture == "x86_64"
+    fail_msg: "This role currently supports Debian 13 amd64 only"
+
 - name: Remove conflicting Docker packages
   ansible.builtin.apt:
     name:
@@ -9,6 +18,15 @@
       - containerd
       - runc
     state: absent
+
+- name: Install Docker repository dependencies
+  ansible.builtin.apt:
+    name:
+      - python3-debian
+      - ca-certificates
+    state: present
+    update_cache: true
+    cache_valid_time: 3600
 
 - name: Ensure APT keyring directory exists
   ansible.builtin.file:
@@ -37,10 +55,12 @@
       - amd64
     signed_by: /etc/apt/keyrings/docker.asc
     state: present
+  register: docker_repository
 
-- name: Update APT cache
+- name: Update APT cache after repository change
   ansible.builtin.apt:
     update_cache: true
+  when: docker_repository.changed
 
 - name: Install Docker Engine
   ansible.builtin.apt:

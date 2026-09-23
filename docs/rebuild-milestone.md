@@ -8,7 +8,7 @@ Debian 13 file server and development VM, not existing data disks.
 
 - [x] 1. Streamline agent guidance and record this milestone.
 - [x] 2. Add repeatable local validation and tested dependency versions.
-- [ ] 3. Make development package provisioning self-contained.
+- [x] 3. Make development package provisioning self-contained.
 - [ ] 4. Configure file servers before development clients.
 - [ ] 5. Strengthen filesystem and NFS validation.
 - [ ] 6. Support explicit access revocation while keeping additions additive.
@@ -32,3 +32,6 @@ runtime tests, and migration tooling for the larger QEMU/KVM environment.
   bash syntax, and ShellCheck passed. Six narrowly scoped lint exceptions retain
   existing public names. Inventory graph passed; full variable loading correctly
   stops with a clear error when Vault credentials are missing.
+
+- Commit 3: development syntax check, YAML lint, and basic Ansible lint passed.
+  Clean-template installation remains a disposable-guest acceptance check.

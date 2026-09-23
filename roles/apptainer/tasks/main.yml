@@ -1,3 +1,12 @@
+---
+- name: Verify supported development platform
+  ansible.builtin.assert:
+    that:
+      - ansible_distribution == "Debian"
+      - ansible_distribution_major_version == "13"
+      - ansible_architecture == "x86_64"
+    fail_msg: "This role currently supports Debian 13 amd64 only"
+
 - name: Download Apptainer package
   ansible.builtin.get_url:
     url: "https://github.com/apptainer/apptainer/releases/download/v{{ apptainer_version }}/apptainer_{{ apptainer_version }}-trixie+_amd64.deb"
