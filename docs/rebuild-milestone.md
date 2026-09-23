@@ -57,10 +57,10 @@ has passed. Record actual validation below; do not infer it from this checklist.
   playbooks with an SSH sentinel and confirmed no connection before confirmation.
 - Real inventory variable loading remains unvalidated: the development Vault
   password source was not available. The full check reports this explicitly.
-- Live acceptance remains unperformed: root SSH through the configured `pgm2`
-  alias returned `Permission denied (publickey,password)`. No guest was created,
-  configured, stopped, or destroyed. Run `docs/disposable-rebuild.md` from a
-  controller with access and record the actual guest/template IDs and recaps here.
+- At commit 8, live acceptance could not be run from this workstation: root SSH
+  through the configured `pgm2` alias returned `Permission denied
+  (publickey,password)`. No guest was changed from this workstation. The
+  disposable guests were subsequently tested from a controller with access.
 - Follow-up: the first disposable server run exposed empty `sudo_users` rendering
   as an invalid `copy` task. The base role now renders a comment-only sudoers
   file in that case. A local regression test checks empty and populated lists
@@ -70,13 +70,18 @@ has passed. Record actual validation below; do not infer it from this checklist.
   development guest run reached RStudio Server, where `verify-installation`
   failed because the service was already running. The role now waits for its
   configured listener, and the collection is pinned to 2.2.0. Fixture validation
-  passed with the updated collection; a live rerun is still needed.
+  passed with the updated collection.
 - Follow-up: live smoke verification reached the NFS automount but could not
   stat its mode-2770 export as client root, which is root-squashed by the server.
   A first fix using Ansible `become_user` failed on the guest while preparing
   temporary module permissions. Verification and marker file operations now
   invoke `runuser` from root-run modules so the NFS access and marker existence
-  check both run as `smoke-user`. Live verification and data checks remain pending.
+  check both run as `smoke-user`.
+- Controller report after commit `0f5ed5b`: the disposable guest `verify.yml`
+  and `data.yml` playbooks both passed. Their detailed recaps were not provided.
+  A second provisioning run, reboot persistence, and the negative storage/export
+  checks in `docs/disposable-rebuild.md` have not been reported yet, so the full
+  runtime acceptance checklist remains open.
 
 ## Local commit map
 
