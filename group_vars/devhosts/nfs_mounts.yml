@@ -3,6 +3,8 @@ nfs_mounts:
     src: rs-fs1.lunarc.lu.se:/disk
   - path: /fs2
     src: rs-fs2.lunarc.lu.se:/disk
+  - path: /media/isilon
+    src: regislysd.i.skane.se:/backup
   - path: /fs3
     src: "{{ hostvars['infra-fs-01'].ansible_host }}:/srv/fs3"
     opts: rw,_netdev,x-systemd.automount,nofail
